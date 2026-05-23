@@ -2757,6 +2757,28 @@
         let currentRomName = "default_game";
         let currentRomBinaryData = null;
 
+        function deleteSaveState(romName) {
+            if (!db) return;
+            try {
+                const transaction = db.transaction([STORE_SAVES], "readwrite");
+                const store = transaction.objectStore(STORE_SAVES);
+                const request = store.delete(romName);
+                request.onsuccess = function() {
+                    const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                    showToast(savedLang === 'vi' ? "🗑️ Đã xóa dữ liệu lưu game lỗi!" : "🗑️ Corrupted save state deleted!", "success");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+                };
+                request.onerror = function() {
+                    const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                    showToast(savedLang === 'vi' ? "❌ Lỗi xóa dữ liệu lưu game!" : "❌ Error clearing save state!", "danger");
+                };
+            } catch (err) {
+                console.error("Lỗi khi xóa Save State:", err);
+            }
+        }
+
         function autoLoadState(romName) {
             if (!db) return;
             const transaction = db.transaction([STORE_SAVES], "readonly");
@@ -2766,17 +2788,29 @@
             request.onsuccess = function (e) {
                 const savedData = e.target.result;
                 if (savedData) {
-                    nes.fromJSON(savedData);
-                    const apu = nes.papu || nes.apu;
-                    if (apu && typeof apu.reset === 'function') {
-                        apu.reset();
+                    try {
+                        nes.fromJSON(savedData);
+                        const apu = nes.papu || nes.apu;
+                        if (apu && typeof apu.reset === 'function') {
+                            apu.reset();
+                        }
+                        if (apu && typeof apu.writeReg === 'function') {
+                            apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to prevent silent save states
+                        }
+                        initAudio();
+                        console.log("Auto-loaded last save state for: " + romName);
+                        audioBufferQueue = [];
+                    } catch (loadError) {
+                        console.error("Auto-load failed due to corrupted save state:", loadError);
+                        const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                        const message = savedLang === 'vi' 
+                            ? "Phát hiện tệp lưu tự động (Save State) bị lỗi khiến game không thể tải. Bạn có muốn XÓA tệp lưu này để khởi động lại game sạch không?" 
+                            : "Corrupted auto-save state detected preventing game from loading. Do you want to CLEAR this save state to restart the game cleanly?";
+                        
+                        if (confirm(message)) {
+                            deleteSaveState(romName);
+                        }
                     }
-                    if (apu && typeof apu.writeReg === 'function') {
-                        apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to prevent silent save states
-                    }
-                    initAudio();
-                    console.log("Auto-loaded last save state for: " + romName);
-                    audioBufferQueue = [];
                 }
             };
         }
@@ -2885,20 +2919,31 @@
                     return;
                 }
 
-                nes.fromJSON(savedData);
-                const apu = nes.papu || nes.apu;
-                if (apu && typeof apu.reset === 'function') {
-                    apu.reset();
+                try {
+                    nes.fromJSON(savedData);
+                    const apu = nes.papu || nes.apu;
+                    if (apu && typeof apu.reset === 'function') {
+                        apu.reset();
+                    }
+                    if (apu && typeof apu.writeReg === 'function') {
+                        apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to prevent silent save states
+                    }
+                    initAudio();
+                    const originalText = btn.innerText;
+                    btn.innerText = "LOADED!";
+                    setTimeout(() => btn.innerText = originalText, 1000);
+                    audioBufferQueue = [];
+                    showToast(savedLang === 'vi' ? "⚡ ĐÃ TẢI LẠI TRẠNG THÁI GAME!" : "⚡ GAME STATE LOADED!", "success");
+                } catch (loadError) {
+                    console.error("Manual load failed due to corrupted save state:", loadError);
+                    const message = savedLang === 'vi' 
+                        ? "Tệp lưu (Save State) bị lỗi khiến game không thể tải. Bạn có muốn XÓA tệp lưu này không?" 
+                        : "Corrupted save state detected. Do you want to CLEAR this save state?";
+                    
+                    if (confirm(message)) {
+                        deleteSaveState(currentRomName);
+                    }
                 }
-                if (apu && typeof apu.writeReg === 'function') {
-                    apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to prevent silent save states
-                }
-                initAudio();
-                const originalText = btn.innerText;
-                btn.innerText = "LOADED!";
-                setTimeout(() => btn.innerText = originalText, 1000);
-                audioBufferQueue = [];
-                showToast(savedLang === 'vi' ? "⚡ ĐÃ TẢI LẠI TRẠNG THÁI GAME!" : "⚡ GAME STATE LOADED!", "success");
             };
         });
 
