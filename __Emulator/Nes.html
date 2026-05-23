@@ -183,6 +183,10 @@
             width: 100%;
         }
 
+        .deck-and-vol-wrapper {
+            margin-top: 5px;
+        }
+
         .tv-screen-wrapper {
             width: 100%;
             height: 100%;
@@ -957,7 +961,7 @@
                 width: 32px;
                 height: 32px;
                 border-radius: 50%;
-                border: 3px solid var(--border-color);
+                border: 2px solid var(--border-color);
                 background: var(--accent-red);
                 color: #FFFFFF;
                 font-size: 16px;
@@ -1245,7 +1249,7 @@
                 font-size: 11px;
                 padding: 5px 10px;
                 background: #FFFFFF;
-                border: 3px solid var(--border-color);
+                border: 2px solid var(--border-color);
                 border-radius: 12px;
                 color: var(--text-main);
                 cursor: pointer;
@@ -1259,7 +1263,8 @@
             }
 
             .desktop-floating-controls .lang-btn:hover {
-                background: var(--accent-yellow);
+                background: var(--accent-purple);
+                color: #FFFFFF;
                 transform: translate(-1px, -1px);
                 box-shadow: 3px 3px 0px var(--border-color);
             }
@@ -2147,11 +2152,11 @@
                         </div>
                         <div class="sticker-row">
                             <span data-vi="🔴 NÚT A:" data-en="🔴 BUTTON A:">🔴 NÚT A:</span>
-                            <span><kbd>]</kbd></span>
+                            <span><kbd>[</kbd></span>
                         </div>
                         <div class="sticker-row">
                             <span data-vi="🟡 NÚT B:" data-en="🟡 BUTTON B:">🟡 NÚT B:</span>
-                            <span><kbd>'</kbd></span>
+                            <span><kbd>P</kbd></span>
                         </div>
                         <div class="sticker-row">
                             <span data-vi="💾 LƯU / TẢI GAME:" data-en="💾 SAVE / LOAD STATE:">💾 LƯU / TẢI GAME:</span>
@@ -2763,14 +2768,14 @@
                 const transaction = db.transaction([STORE_SAVES], "readwrite");
                 const store = transaction.objectStore(STORE_SAVES);
                 const request = store.delete(romName);
-                request.onsuccess = function() {
+                request.onsuccess = function () {
                     const savedLang = localStorage.getItem('selected_lang') || 'vi';
                     showToast(savedLang === 'vi' ? "🗑️ Đã xóa dữ liệu lưu game lỗi!" : "🗑️ Corrupted save state deleted!", "success");
                     setTimeout(() => {
                         window.location.reload();
                     }, 1200);
                 };
-                request.onerror = function() {
+                request.onerror = function () {
                     const savedLang = localStorage.getItem('selected_lang') || 'vi';
                     showToast(savedLang === 'vi' ? "❌ Lỗi xóa dữ liệu lưu game!" : "❌ Error clearing save state!", "danger");
                 };
@@ -2803,10 +2808,10 @@
                     } catch (loadError) {
                         console.error("Auto-load failed due to corrupted save state:", loadError);
                         const savedLang = localStorage.getItem('selected_lang') || 'vi';
-                        const message = savedLang === 'vi' 
-                            ? "Phát hiện tệp lưu tự động (Save State) bị lỗi khiến game không thể tải. Bạn có muốn XÓA tệp lưu này để khởi động lại game sạch không?" 
+                        const message = savedLang === 'vi'
+                            ? "Phát hiện tệp lưu tự động (Save State) bị lỗi khiến game không thể tải. Bạn có muốn XÓA tệp lưu này để khởi động lại game sạch không?"
                             : "Corrupted auto-save state detected preventing game from loading. Do you want to CLEAR this save state to restart the game cleanly?";
-                        
+
                         if (confirm(message)) {
                             deleteSaveState(romName);
                         }
@@ -2936,10 +2941,10 @@
                     showToast(savedLang === 'vi' ? "⚡ ĐÃ TẢI LẠI TRẠNG THÁI GAME!" : "⚡ GAME STATE LOADED!", "success");
                 } catch (loadError) {
                     console.error("Manual load failed due to corrupted save state:", loadError);
-                    const message = savedLang === 'vi' 
-                        ? "Tệp lưu (Save State) bị lỗi khiến game không thể tải. Bạn có muốn XÓA tệp lưu này không?" 
+                    const message = savedLang === 'vi'
+                        ? "Tệp lưu (Save State) bị lỗi khiến game không thể tải. Bạn có muốn XÓA tệp lưu này không?"
                         : "Corrupted save state detected. Do you want to CLEAR this save state?";
-                    
+
                     if (confirm(message)) {
                         deleteSaveState(currentRomName);
                     }
@@ -3139,8 +3144,8 @@
             "KeyK": jsnes.Controller.BUTTON_DOWN,
             "KeyJ": jsnes.Controller.BUTTON_LEFT,
             "KeyL": jsnes.Controller.BUTTON_RIGHT,
-            "Quote": jsnes.Controller.BUTTON_B,
-            "BracketRight": jsnes.Controller.BUTTON_A
+            "BracketLeft": jsnes.Controller.BUTTON_A,
+            "KeyP": jsnes.Controller.BUTTON_B
         };
 
         window.addEventListener("keydown", function (e) {
