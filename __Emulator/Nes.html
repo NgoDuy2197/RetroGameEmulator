@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="vi" class="rom-not-loaded">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description"
+        content="Trình giả lập NES (Điện tử 4 nút 8-bit) trực tuyến cực mượt. Hỗ trợ 2 người chơi trên PC, lưu game (Save State), nạp game (Load State) và reset game nhanh.">
+    <meta name="keywords" content="gia lap nes, choi game nes online, dien tu 4 nut online, nes emulator online">
+    <title>Trình Giả Lập NES Online - Chơi Game Điện Tử Bốn Nút 8-Bit Cực Mượt</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300..700&family=Lexend:wght@300..800&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsnes/1.2.1/jsnes.min.js"></script>
+    <script src="../extends.js"></script>
+    <style>
+        :root {
+            --bg-color: #FAF8F2;
+            /* Cream white */
+            --panel-color: #FFFFFF;
+            /* Pure white */
+            --border-color: #2E3A59;
+            /* Slate navy */
+            --accent-purple: #B176F0;
+            /* Soft violet purple */
+            --accent-red: #FF6B6B;
+            /* Cute red */
+            --accent-blue: #4EA8DE;
+            /* Sky blue */
+            --accent-yellow: #FFD166;
+            /* Warm yellow */
+            --accent-green: #06D6A0;
+            /* Mint green */
+            --text-main: #2E3A59;
+            --text-muted: #6E768E;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #111;
+            font-family: 'Fredoka', 'Lexend', 'Courier New', Courier, monospace;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Thanh công cụ Retro phía trên */
+        .top-bar {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            background: #222;
+            border-bottom: 3px solid #8A1C14;
+            z-index: 10;
+            gap: 5px;
+        }
+
+        .logo {
+            color: #E6D5B8;
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 1px 1px #000;
+            letter-spacing: 1px;
+        }
+
+        .mobile-back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 35%;
+            border: 2px solid #E6D5B8;
+            background: #8A1C14;
+            color: #E6D5B8;
+            font-size: 19px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 1px 1px 0px #000;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .mobile-back-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px #000;
+        }
+
+        .sys-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .bar-btn {
+            background: #333;
+            color: #E6D5B8;
+            padding: 5px 6px;
+            border: 1.5px solid #E6D5B8;
+            border-radius: 4px;
+            font-size: 9px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 1px 1px 0px #000;
+            text-transform: uppercase;
+        }
+
+        .bar-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px #000;
+        }
+
+        .file-input-label {
+            background: #8A1C14;
+        }
+
+        #rom-file {
+            display: none;
+        }
+
+        /* ZONE PHÒNG QUẢNG CÁO GOOGLE ADSENSE */
+        #adsense-top-zone {
+            width: 100%;
+            background: #151515;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 1px solid #222;
+            min-height: 50px;
+            text-align: center;
+        }
+
+        .ads-placeholder {
+            color: #444;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* Khu vực hiển thị màn hình Game */
+        .screen-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #050505;
+            position: relative;
+            overflow: hidden;
+            padding: 5px 10px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 512px;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
+            background-color: black;
+        }
+
+        #nes-canvas {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            image-rendering: pixelated;
+            transition: filter 0.2s;
+        }
+
+        /* KHU VỰC ĐIỀU KHIỂN PHỤ PHÍA TRÊN NÚT BẤM (SUB-DASHBOARD) */
+        .sub-dashboard {
+            background: #1e1e1e;
+            height: 42px;
+            border-top: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            gap: 10px;
+            z-index: 8;
+        }
+
+        .dash-vol-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #aaa;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 65px;
+            height: 5px;
+            background: #444;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #8A1C14;
+            cursor: pointer;
+        }
+
+        .dash-btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dash-btn {
+            background: #2a2a2a;
+            color: #ccc;
+            border: 1px solid #555;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .dash-btn:active {
+            background: #444;
+        }
+
+        #btn-speed {
+            background: #1a3a5f;
+            color: #00f0ff;
+            border-color: #00f0ff;
+        }
+
+        /* ========================================== */
+        /* HỆ THỐNG FILTER MÀN HÌNH SÁNG TẠO */
+        /* ========================================== */
+        .canvas-wrapper.filter-crt::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+
+            background:
+                radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, transparent 100%, rgba(0, 0, 0, 0.65) 100%),
+                repeating-linear-gradient(rgba(0, 0, 0, 0.14) 0px, rgba(0, 0, 0, 0.14) 2px, transparent 2px, transparent 3px);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .filter-crt #nes-canvas {
+            filter: contrast(1.15) brightness(1.1);
+        }
+
+        .canvas-wrapper.filter-pixel::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image:
+                linear-gradient(90deg, rgba(0, 0, 0, 0.25) 1px, transparent 1px),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.25) 1px, transparent 1px);
+            background-size: 3px 3px;
+            /* Beautiful micro-pixel grid mesh */
+            z-index: 2;
+            pointer-events: none;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .filter-pixel #nes-canvas {
+            filter: contrast(1.3) saturate(1.15) brightness(1.05);
+            image-rendering: pixelated;
+        }
+
+        .filter-warm #nes-canvas {
+            filter: sepia(0.45) saturate(1.4) contrast(1.1) hue-rotate(-10deg);
+        }
+
+        .filter-mono #nes-canvas {
+            filter: grayscale(1) contrast(1.4);
+        }
+
+        .filter-cyber #nes-canvas {
+            filter: saturate(2) hue-rotate(140deg) contrast(1.2);
+        }
+
+        .filter-gbgreen #nes-canvas {
+            filter: sepia(0.8) hue-rotate(40deg) saturate(2.5) contrast(1.1) brightness(0.9);
+        }
+
+        /* Mascot Mặt cười nhảy múa */
+        #virus-mascot {
+            position: absolute;
+            font-size: 30px;
+            animation: bounceMascot 0.6s infinite alternate cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 4;
+            cursor: pointer;
+            filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.5));
+        }
+
+        @keyframes bounceMascot {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                transform: translateY(-15px) scale(0.95, 1.05);
+            }
+        }
+
+        /* TAY CẦM GIẢ LẬP */
+        .gamepad {
+            height: 275px;
+            position: relative;
+            border-top: 3px solid #333;
+            touch-action: none;
+            padding-bottom: env(safe-area-inset-bottom);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        /* ------------------------------------- */
+        /* HỆ THỐNG THEME TAY CẦM */
+        /* ------------------------------------- */
+        .theme-famicom {
+            background: #DFD3C3;
+            border-top-color: #333;
+        }
+
+        .theme-famicom .action-btn {
+            background: #8A1C14;
+            color: #DFD3C3;
+            border-color: #222;
+            box-shadow: 0px 4px 0px #5a100b, 2px 4px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .theme-famicom .dpad-cross::before,
+        .theme-famicom .dpad-cross::after {
+            background: #222;
+        }
+
+        .theme-vice {
+            background: #1b1233;
+            border-top-color: #ff007f;
+        }
+
+        .theme-vice .dpad-cross::before,
+        .theme-vice .dpad-cross::after {
+            background: #0b061a;
+            border: 1.5px solid #00f0ff;
+            box-shadow: 0px 0px 10px rgba(0, 240, 255, 0.6);
+        }
+
+        .theme-vice .action-btn {
+            background: transparent;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .theme-vice #btn-A {
+            border: 3px solid #ff007f;
+            box-shadow: inset 0 0 8px #ff007f, 0 0 12px #ff007f;
+        }
+
+        .theme-vice #btn-B {
+            border: 3px solid #ffea00;
+            box-shadow: inset 0 0 8px #ffea00, 0 0 12px #ffea00;
+            color: #ffea00;
+        }
+
+        .theme-vice .sys-label {
+            color: #00f0ff;
+            text-shadow: 0 0 3px #00f0ff;
+        }
+
+        .theme-vice .action-label {
+            color: #ff007f;
+            text-shadow: 0 0 3px #ff007f;
+        }
+
+        .theme-vice .sys-btn {
+            background: #00f0ff;
+            border-color: #fff;
+            box-shadow: 0 0 6px #00f0ff;
+        }
+
+        .theme-matcha {
+            background: #E1EAD8;
+            border-top-color: #7A8B6E;
+        }
+
+        .theme-matcha .action-btn {
+            background: #FFFFFF;
+            color: #556B2F;
+            border-color: #7A8B6E;
+            box-shadow: 0px 4px 0px #A3B899, 2px 3px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-matcha .dpad-cross::before,
+        .theme-matcha .dpad-cross::after {
+            background: #607151;
+        }
+
+        .theme-matcha .action-label,
+        .theme-matcha .sys-label {
+            color: #556B2F;
+        }
+
+        .theme-matcha .sys-btn {
+            background: #A3B899;
+            border-color: #607151;
+        }
+
+        .theme-sakura {
+            background: #FCEBEB;
+            border-top-color: #EFA8B8;
+        }
+
+        .theme-sakura .action-btn {
+            background: #FFFFFF;
+            color: #D65A7F;
+            border-color: #EFA8B8;
+            box-shadow: 0px 4px 0px #F5C2C9, 2px 3px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-sakura .dpad-cross::before,
+        .theme-sakura .dpad-cross::after {
+            background: #D65A7F;
+        }
+
+        .theme-sakura .action-label,
+        .theme-sakura .sys-label {
+            color: #C94A6E;
+        }
+
+        .theme-sakura .sys-btn {
+            background: #F5C2C9;
+            border-color: #D65A7F;
+        }
+
+        .theme-gameboy {
+            background: #c3c7db;
+            border-top-color: #8b8e9c;
+        }
+
+        .theme-gameboy .action-btn {
+            background: #8b1d56;
+            color: #fff;
+            border-color: #333;
+            box-shadow: 0px 4px 0px #541134, 2px 4px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-gameboy .dpad-cross::before,
+        .theme-gameboy .dpad-cross::after {
+            background: #4a4d52;
+        }
+
+        .theme-gameboy .sys-btn {
+            background: #8b8e9c;
+        }
+
+        .theme-neon {
+            background: #0d0e15;
+            border-top-color: #00ffcc;
+        }
+
+        .theme-neon .action-btn {
+            background: #ff0055;
+            color: #fff;
+            border-color: #00ffcc;
+            box-shadow: 0px 0px 12px #ff0055, 0px 4px 0px #990033;
+        }
+
+        .theme-neon .dpad-cross::before,
+        .theme-neon .dpad-cross::after {
+            background: #1a1c29;
+            border: 1px solid #00ffcc;
+            box-shadow: 0px 0px 8px rgba(0, 255, 204, 0.4);
+        }
+
+        .theme-neon .sys-label {
+            color: #00ffcc;
+        }
+
+        .theme-neon .action-label {
+            color: #ff0055;
+        }
+
+        .theme-neon .sys-btn {
+            background: #00ffcc;
+            border-color: #fff;
+            box-shadow: 0px 0px 8px rgba(0, 255, 204, 0.4);
+        }
+
+        .theme-midnight {
+            background: #22252a;
+            border-top-color: #444;
+        }
+
+        .theme-midnight .action-btn {
+            background: #414652;
+            color: #e2e4e9;
+            border-color: #111;
+            box-shadow: 0px 4px 0px #252830, 2px 4px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-midnight .dpad-cross::before,
+        .theme-midnight .dpad-cross::after {
+            background: #111;
+        }
+
+        .theme-midnight .action-label,
+        .theme-midnight .sys-label {
+            color: #a1a3a6;
+        }
+
+        /* Vùng điều hướng Dpad nâng cao */
+        .dpad-center {
+            position: absolute;
+            left: 80px;
+            bottom: 125px;
+            width: 130px;
+            height: 130px;
+            transform: translate(-50%, 50%);
+        }
+
+        .dpad-cross {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .dpad-cross::before,
+        .dpad-cross::after {
+            content: "";
+            position: absolute;
+            border-radius: 4px;
+            box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+        }
+
+        .dpad-cross::before {
+            top: 43px;
+            left: 0;
+            width: 130px;
+            height: 44px;
+        }
+
+        .dpad-cross::after {
+            top: 0;
+            left: 43px;
+            width: 44px;
+            height: 130px;
+        }
+
+        .dpad-core {
+            position: absolute;
+            top: 45px;
+            left: 45px;
+            width: 40px;
+            height: 40px;
+            background: #111;
+            border-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .dpad-cross.active-up::after {
+            background: linear-gradient(to bottom, #555 50%, #222 50%) !important;
+        }
+
+        .dpad-cross.active-down::after {
+            background: linear-gradient(to top, #555 50%, #222 50%) !important;
+        }
+
+        .dpad-cross.active-left::before {
+            background: linear-gradient(to right, #555 50%, #222 50%) !important;
+        }
+
+        .dpad-cross.active-right::before {
+            background: linear-gradient(to left, #555 50%, #222 50%) !important;
+        }
+
+        /* CỤM NÚT HỆ THỐNG SELECT / START */
+        .center-btns {
+            display: flex;
+            gap: 22px;
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .sys-btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sys-btn {
+            background: #6d7677;
+            height: 18px;
+            width: 52px;
+            border-radius: 9px;
+            border: 2.5px solid #222;
+            box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .sys-btn.active {
+            background: #111 !important;
+            transform: scale(0.92);
+        }
+
+        .sys-label {
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        /* CỤM NÚT HÀNH ĐỘNG A / B */
+        .action-group {
+            position: absolute;
+            right: 75px;
+            bottom: 125px;
+            width: 150px;
+            height: 80px;
+            transform: translate(50%, 50%) rotate(-28deg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transform: rotate(28deg);
+        }
+
+        .action-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .action-btn.active {
+            transform: translateY(3px);
+            box-shadow: 0px 1px 0px #5a100b !important;
+        }
+
+        .action-label {
+            font-size: 10px;
+            color: #222;
+            font-weight: bold;
+        }
+
+        /* TỐI ƯU LANDSCAPE */
+        @media (orientation: landscape) {
+            .container {
+                flex-direction: row;
+            }
+
+            .top-bar {
+                width: 75px;
+                height: 100%;
+                flex-direction: column;
+                padding: 15px 0;
+                border-bottom: none;
+                border-right: 3px solid #8A1C14;
+                justify-content: flex-start;
+            }
+
+            .sys-controls {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .logo {
+                transform: rotate(-90deg);
+                margin-bottom: 35px;
+                margin-top: 15px;
+                white-space: nowrap;
+            }
+
+            .sub-dashboard {
+                flex-direction: column;
+                width: 45px;
+                height: 100%;
+                padding: 15px 0;
+                border-top: none;
+                border-left: 2px solid #333;
+            }
+
+            .dash-vol-group {
+                flex-direction: column;
+            }
+
+            .volume-slider {
+                width: 55px;
+                transform: rotate(-90deg);
+                margin: 25px 0;
+            }
+
+            .dash-btn-group {
+                flex-direction: column;
+            }
+
+            .dpad-center {
+                left: 95px;
+                bottom: 53%;
+            }
+
+            .action-group {
+                right: 90px;
+                bottom: 53%;
+            }
+
+            .center-btns {
+                bottom: 25px;
+            }
+        }
+
+        /* ======================================================= */
+        /* CẤU HÌNH DESKTOP VÀ HIỆU ỨNG TÔNG MÀU SÁNG NEOBRUTALISM */
+        /* ======================================================= */
+        .desktop-only {
+            display: none !important;
+        }
+
+        .mobile-only {
+            display: flex;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .screen-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 24px;
+            font-weight: 800;
+            font-size: 14.5px;
+            z-index: 99999;
+            box-shadow: 4px 4px 0px var(--border-color);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Fredoka', sans-serif;
+            color: var(--text-main);
+        }
+
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--accent-green);
+            color: #FFFFFF;
+        }
+
+        .toast.warning {
+            background: var(--accent-yellow);
+            color: var(--text-main);
+        }
+
+        .toast.danger {
+            background: var(--accent-red);
+            color: #FFFFFF;
+        }
+
+        .welcome-box {
+            display: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .desktop-only {
+                display: flex !important;
+            }
+
+            button.desktop-only,
+            label.desktop-only {
+                display: inline-flex !important;
+            }
+
+            .mobile-only {
+                display: none !important;
+            }
+
+            body,
+            html {
+                overflow: hidden;
+                position: fixed;
+                background-color: var(--bg-color);
+                background-image: radial-gradient(rgba(110, 118, 142, 0.1) 1.5px, transparent 1.5px);
+                background-size: 20px 20px;
+                color: var(--text-main);
+            }
+
+            .container {
+                flex-direction: column !important;
+                height: 100vh;
+            }
+
+            /* Top Bar completely hidden on desktop */
+            .top-bar {
+                display: none !important;
+            }
+
+            .logo-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .back-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                border: 3px solid var(--border-color);
+                background: var(--accent-red);
+                color: #FFFFFF;
+                font-size: 16px;
+                font-weight: 900;
+                text-decoration: none;
+                box-shadow: 2px 2px 0px var(--border-color);
+                transition: all 0.15s ease;
+                cursor: pointer;
+            }
+
+            .back-btn:hover {
+                background: #ff8787;
+                transform: translate(-1.5px, -1.5px);
+                box-shadow: 3px 3px 0px var(--border-color);
+            }
+
+            .back-btn:active {
+                transform: translate(1px, 1px);
+                box-shadow: 1px 1px 0px var(--border-color);
+            }
+
+            .logo {
+                color: var(--text-main);
+                font-family: 'Fredoka', sans-serif;
+                font-weight: 800;
+                font-size: 18px;
+                text-shadow: none;
+                letter-spacing: 0.5px;
+                transform: none !important;
+                margin: 0 !important;
+                white-space: nowrap;
+            }
+
+            .sys-controls {
+                flex-direction: row !important;
+                gap: 8px !important;
+                margin: 0 !important;
+            }
+
+            .bar-btn {
+                background: #FFFFFF;
+                color: var(--text-main);
+                padding: 6px 12px;
+                border: 3px solid var(--border-color);
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow: 2px 2px 0px var(--border-color);
+                text-transform: uppercase;
+                font-family: 'Fredoka', sans-serif;
+                transition: all 0.15s ease;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .bar-btn:hover {
+                background: var(--accent-yellow);
+                transform: translate(-1px, -1px);
+                box-shadow: 3px 3px 0px var(--border-color);
+            }
+
+            .bar-btn:active {
+                transform: translate(1px, 1px);
+                box-shadow: 1px 1px 0px var(--border-color);
+            }
+
+            .file-input-label {
+                background: var(--accent-purple) !important;
+                color: #FFFFFF !important;
+                border-color: var(--border-color) !important;
+            }
+
+            .file-input-label:hover {
+                background: #c597f5 !important;
+            }
+
+            /* LANGUAGE SWITCH */
+            .lang-switch-container {
+                display: flex;
+                gap: 4px;
+            }
+
+            .lang-btn {
+                font-family: 'Fredoka', sans-serif;
+                font-weight: 800;
+                font-size: 11px;
+                padding: 4px 8px;
+                background: #FFFFFF;
+                border: 2px solid var(--border-color);
+                border-radius: 12px;
+                color: var(--text-main);
+                cursor: pointer;
+                box-shadow: 1.5px 1.5px 0px var(--border-color);
+                transition: all 0.1s ease;
+            }
+
+            .lang-btn.active {
+                background: var(--accent-blue);
+                color: #FFFFFF;
+            }
+
+            /* Main Layout takes 100% height when header is hidden */
+            .main-layout {
+                flex-direction: row !important;
+                flex: 1;
+                overflow: hidden;
+                height: 100% !important;
+                width: 100%;
+            }
+
+            .desktop-ad-side {
+                display: flex !important;
+                flex-direction: column;
+                width: 250px;
+                height: 100%;
+                background: #eae1cf !important;
+                /* Striped wallpaper color */
+                background-image: linear-gradient(90deg, rgba(46, 58, 89, 0.03) 1px, transparent 1px) !important;
+                background-size: 30px 100% !important;
+                padding: 20px 10px;
+                box-sizing: border-box;
+                justify-content: center !important;
+                /* Center the two frames vertically */
+                align-items: center;
+                gap: 30px !important;
+                /* Space between two frames */
+            }
+
+            .desktop-ad-right {
+                border-right: none;
+            }
+
+            /* Ornate square picture frames for ads */
+            .square-picture-frame-ad {
+                width: 240px;
+                height: 240px;
+                border-radius: 4px;
+                padding: 3px;
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+
+            .square-picture-frame-ad .frame-inner {
+                width: 100%;
+                height: 100%;
+                background: #fcf8ee;
+                /* Gold trim */
+                padding: 3px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                box-sizing: border-box;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .square-picture-frame-ad .ad-label {
+                font-size: 8px;
+                color: var(--text-muted);
+                font-weight: 800;
+                margin-bottom: 2px;
+                letter-spacing: 0.5px;
+            }
+
+            .square-picture-frame-ad .ad-placeholder {
+                color: #5d4037;
+                font-family: 'Fredoka', sans-serif;
+                font-size: 10px;
+                font-weight: bold;
+                text-align: center;
+                border: 2px dashed #cbd5e1;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #ffffff;
+                border-radius: 4px;
+            }
+
+
+
+            /* Screen Area wrapping TV console */
+            .screen-area {
+                flex: 1;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                background-color: var(--bg-color);
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                box-sizing: border-box;
+                overflow-y: auto;
+            }
+
+            /* Unified Screen Layout (Mobile default) */
+            .tv-cabinet {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #050505;
+                position: relative;
+                overflow: hidden;
+                width: 100%;
+            }
+
+            .tv-screen-wrapper {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #000;
+            }
+
+            /* Retro TV Cabinet Wrapper (Desktop Override) */
+            @media (min-width: 1024px) {
+                .screen-area {
+                    flex: 1;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    /* Cozy living room background: elegant striped wallpaper at top 60%, wood tabletop console at bottom 40% */
+                    background:
+                        linear-gradient(to bottom,
+                            /* 1. Phần khoảng không sáng phía sau tivi (Tùy chọn nền) */
+                            #f4ebd9 0%, #f4ebd9 55%,
+                            /* 2. Mặt trên của kệ/tủ gỗ sáng (Màu gỗ sồi sáng) */
+                            #e8d3b4 55%, #dfc39e 57%,
+                            /* 3. Thân tủ gỗ sáng kèm các đường vân gỗ/độ bóng đổ */
+                            #d1b084 57%, #c6a172 100%);
+                    background-image:
+                        /* Wallpaper stripes */
+                        linear-gradient(90deg, rgba(46, 58, 89, 0.03) 1px, transparent 1px),
+                        /* Room gradient */
+                        linear-gradient(to bottom,
+                            /* 1. Phần khoảng không sáng phía sau tivi (Tùy chọn nền) */
+                            #f4ebd9 0%, #f4ebd9 60%,
+                            /* 2. Mặt trên của kệ/tủ gỗ sáng (Màu gỗ sồi sáng) */
+                            #e8d3b4 70%, #dfc39e 90%,
+                            /* 3. Thân tủ gỗ sáng kèm các đường vân gỗ/độ bóng đổ */
+                            #d1b084 92%, #c6a172 100%);
+                    background-size: 30px 100%, 100% 100%;
+                    background-attachment: fixed;
+                    justify-content: flex-start;
+                    align-items: center;
+                    padding: 10px 20px 20px 20px;
+                    /* Adjusted to exactly 10px top padding for clear screen view */
+                    box-sizing: border-box;
+                    overflow-y: auto;
+                    scroll-behavior: smooth;
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(46, 58, 89, 0.3) transparent;
+                }
+
+                .screen-area::-webkit-scrollbar {
+                    width: 6px;
+                }
+                .screen-area::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .screen-area::-webkit-scrollbar-thumb {
+                    background: rgba(46, 58, 89, 0.3);
+                    border-radius: 3px;
+                }
+                .screen-area::-webkit-scrollbar-thumb:hover {
+                    background: var(--accent-red);
+                }
+
+                /* Floating controls bar */
+                .desktop-floating-controls {
+                    position: absolute;
+                    top: 15px;
+                    left: 20px;
+                    right: 20px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    pointer-events: none;
+                    z-index: 100;
+                }
+
+                .desktop-floating-controls .back-btn,
+                .desktop-floating-controls .lang-switch-container {
+                    pointer-events: auto;
+                }
+
+                .desktop-floating-controls .lang-btn {
+                    font-family: 'Fredoka', sans-serif;
+                    font-weight: 800;
+                    font-size: 11px;
+                    padding: 5px 10px;
+                    background: #FFFFFF;
+                    border: 3px solid var(--border-color);
+                    border-radius: 12px;
+                    color: var(--text-main);
+                    cursor: pointer;
+                    box-shadow: 2px 2px 0px var(--border-color);
+                    transition: all 0.1s ease;
+                }
+
+                .desktop-floating-controls .lang-btn.active {
+                    background: var(--accent-blue);
+                    color: #FFFFFF;
+                }
+
+                .desktop-floating-controls .lang-btn:hover {
+                    background: var(--accent-yellow);
+                    transform: translate(-1px, -1px);
+                    box-shadow: 3px 3px 0px var(--border-color);
+                }
+
+                .desktop-floating-controls .lang-btn:active {
+                    transform: translate(1px, 1px);
+                    box-shadow: 1px 1px 0px var(--border-color);
+                }
+
+                /* Hanging picture frame ad slot above the TV */
+                .picture-frame-ad {
+                    width: 100%;
+                    max-width: 680px;
+                    height: 105px;
+                    border-radius: 4px;
+                    padding: 4px;
+                    position: relative;
+                    box-sizing: border-box;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .picture-frame-ad .frame-inner {
+                    width: 100%;
+                    height: 100%;
+                    background: #fcf8ee;
+                    /* Cozy off-white artwork canvas */
+                    /* Ornate gold inner trim */
+                    padding: 4px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    box-sizing: border-box;
+                    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+                }
+
+                .picture-frame-ad .ad-label {
+                    font-size: 8px;
+                    color: var(--text-muted);
+                    font-weight: 800;
+                    margin-bottom: 2px;
+                    letter-spacing: 1px;
+                }
+
+                .picture-frame-ad .ad-placeholder {
+                    color: #5d4037;
+                    font-family: 'Fredoka', sans-serif;
+                    font-size: 11px;
+                    font-weight: bold;
+                    text-align: center;
+                    border: 2px dashed #cbd5e1;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #ffffff;
+                    border-radius: 6px;
+                }
+
+                .tv-cabinet {
+                    flex: none;
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                    max-width: 680px;
+                    /* Increased from 550px for larger TV display */
+                    margin-top: 10px;
+                    margin-bottom: 15px;
+                    background: linear-gradient(135deg, #1f1f1f 0%, #0d0d0d 100%);
+                    /* Matte black retro plastic cabinet */
+                    border-radius: 15px;
+                    box-shadow:
+                        0 12px 30px rgba(0, 0, 0, 0.7),
+                        0 24px 50px rgba(0, 0, 0, 0.5),
+                        inset 0 0 25px rgba(0, 0, 0, 0.9);
+                    /* Thinner padding inside cabinet */
+                    box-sizing: border-box;
+                    position: relative;
+                }
+
+                /* Responsive auto-scaling for shorter viewports to guarantee top is never clipped */
+                @media (max-height: 750px) {
+                    .screen-area {
+                        padding: 5px 15px 15px 15px;
+                    }
+
+                    .tv-cabinet {
+                        max-width: 580px;
+                        margin-top: 5px;
+                        margin-bottom: 8px;
+                    }
+
+                    .picture-frame-ad {
+                        max-width: 580px;
+                        height: 90px;
+                    }
+
+                    .keyboard-legend-sticker {
+                        margin-top: 10px;
+                        padding: 10px 15px;
+                        gap: 15px;
+                        border-radius: 12px;
+                    }
+
+                    .keyboard-legend-sticker .sticker-title {
+                        font-size: 11px;
+                        margin-bottom: 2px;
+                        padding-bottom: 2px;
+                    }
+
+                    .keyboard-legend-sticker .sticker-row {
+                        font-size: 10.5px;
+                    }
+
+                    .keyboard-legend-sticker kbd {
+                        font-size: 8px;
+                        padding: 0.5px 3px;
+                    }
+                }
+
+                @media (max-height: 650px) {
+                    .screen-area {
+                        padding: 5px 10px 10px 10px;
+                    }
+
+                    .tv-cabinet {
+                        max-width: 480px;
+                        margin-top: 4px;
+                        margin-bottom: 6px;
+                    }
+
+                    .picture-frame-ad {
+                        max-width: 480px;
+                        height: 80px;
+                    }
+
+                    .keyboard-legend-sticker {
+                        margin-top: 8px;
+                        padding: 8px 12px;
+                        gap: 10px;
+                        border-radius: 10px;
+                    }
+
+                    .keyboard-legend-sticker .sticker-title {
+                        font-size: 10px;
+                        margin-bottom: 1px;
+                        padding-bottom: 1px;
+                    }
+
+                    .keyboard-legend-sticker .sticker-row {
+                        font-size: 9.5px;
+                        gap: 4px;
+                    }
+
+                    .keyboard-legend-sticker kbd {
+                        font-size: 7.5px;
+                        padding: 0.5px 2px;
+                    }
+                }
+
+                .tv-cabinet::before {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 50%;
+                    background: linear-gradient(rgba(255, 255, 255, 0.04), transparent);
+                    border-radius: 27px 27px 0 0;
+                    pointer-events: none;
+                }
+
+                /* TV Bezel and Screen - Bulb/CRT shape */
+                .tv-screen-wrapper {
+                    background: #000000;
+                    /* border: 8px solid #141414; */
+                    /* Textured deep matte black bezel - thinned to 8px! */
+                    border-radius: 20px;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow:
+                        inset 0 0 25px rgba(0, 0, 0, 1),
+                        0 4px 10px rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 100%;
+                    aspect-ratio: 4 / 3;
+                    transform: perspective(800px) rotateX(1deg);
+                }
+
+                .canvas-wrapper {
+                    max-width: 100% !important;
+                    height: 100% !important;
+                    width: 100% !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                    border-radius: 12px !important;
+                    background: #000 !important;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    transition: background 0.3s ease;
+                }
+
+                #nes-canvas {
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: contain;
+                    border-radius: 16px;
+                }
+
+                /* Dark glass sheen on canvas wrapper when ROM not loaded (simulates real physically turned off TV screen) */
+                .rom-not-loaded .canvas-wrapper {
+                    background: radial-gradient(circle at 50% 30%, #1c1c1c 0%, #050505 100%) !important;
+                }
+
+                /* TV Controls deck sitting standalone below the screen */
+                .tv-controls-deck {
+                    background: #1e1e1e;
+                    /* Vintage dark charcoal console */
+                    border: 4px solid #121212;
+                    border-radius: 16px;
+                    padding: 10px 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 16px;
+                    width: 100%;
+                    max-width: 800px;
+                    /* Standalone wider footprint! */
+                    margin-top: 15px;
+                    margin-bottom: 15px;
+                    box-shadow:
+                        0 8px 20px rgba(0, 0, 0, 0.6),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.05);
+                    box-sizing: border-box;
+                    z-index: 10;
+                }
+
+                @media (max-height: 750px) {
+                    .tv-controls-deck {
+                        max-width: 720px;
+                        margin-top: 10px;
+                        margin-bottom: 10px;
+                    }
+                }
+
+                @media (max-height: 650px) {
+                    .tv-controls-deck {
+                        max-width: 620px;
+                        padding: 6px 12px;
+                        margin-top: 8px;
+                        margin-bottom: 8px;
+                    }
+                }
+
+                /* Bottom ad below the controls deck on the wooden tabletop */
+                .desktop-ad-bottom {
+                    width: 100%;
+                    max-width: 800px;
+                    height: 90px;
+                    background: rgba(15, 15, 15, 0.85);
+                    /* Premium dark-acrylic panel */
+                    border: 3px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 12px;
+                    box-shadow:
+                        0 8px 16px rgba(0, 0, 0, 0.4),
+                        inset 0 0 10px rgba(0, 0, 0, 0.6);
+                    padding: 6px;
+                    box-sizing: border-box;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 15px;
+                    z-index: 10;
+                }
+
+                @media (max-height: 750px) {
+                    .desktop-ad-bottom {
+                        max-width: 720px;
+                        height: 80px;
+                        margin-bottom: 10px;
+                    }
+                }
+
+                @media (max-height: 650px) {
+                    .desktop-ad-bottom {
+                        max-width: 620px;
+                        height: 70px;
+                        margin-bottom: 8px;
+                    }
+                }
+
+                .desktop-ad-bottom .ad-label {
+                    font-size: 8px;
+                    color: #777;
+                    font-weight: 800;
+                    margin-bottom: 2px;
+                    letter-spacing: 1px;
+                }
+
+                .desktop-ad-bottom .ad-placeholder {
+                    color: #aaa;
+                    font-family: 'Fredoka', sans-serif;
+                    font-size: 11px;
+                    font-weight: bold;
+                    text-align: center;
+                    border: 2px dashed rgba(255, 255, 255, 0.15);
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0, 0, 0, 0.4);
+                    border-radius: 6px;
+                }
+
+                /* Physical speaker slits */
+                .speaker-grill {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    width: 48px;
+                }
+
+                .speaker-grill span {
+                    height: 4px;
+                    background: #080808;
+                    /* Pitch black grill lines */
+                    border-radius: 2px;
+                    opacity: 0.9;
+                }
+
+                /* Main system console buttons */
+                .deck-main-controls {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex: 1;
+                }
+
+                /* LED Power Light */
+                .power-led-group {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 3px;
+                    margin-right: 6px;
+                }
+
+                .power-led-light {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    background: #EF4444;
+                    border: 2px solid var(--border-color);
+                    box-shadow: 0 0 5px #EF4444;
+                    transition: all 0.3s ease;
+                }
+
+                .rom-loaded .power-led-light {
+                    background: #10B981;
+                    box-shadow: 0 0 8px #10B981, 0 0 15px #10B981;
+                }
+
+                .power-led-label {
+                    font-family: 'Fredoka', sans-serif;
+                    font-weight: 800;
+                    font-size: 8px;
+                    color: #FFFFFF;
+                    letter-spacing: 0.5px;
+                }
+
+                /* TV buttons styled as mechanical brushed metal keys */
+                .deck-btn {
+                    font-family: 'Fredoka', sans-serif;
+                    font-weight: 800;
+                    font-size: 11px;
+                    padding: 8px 12px;
+                    /* 1. Đổi border thành màu đen bóng của tivi */
+                    border: 2px solid #1a1a1a;
+                    border-radius: 6px;
+                    cursor: pointer;
+
+                    /* 2. Gradient nhựa đen sâu (Dark Premium Acrylic) */
+                    background: linear-gradient(180deg, #3a3a3a 0%, #222222 40%, #181818 60%, #0a0a0a 100%);
+
+                    /* 3. Màu chữ phát sáng Neon (Ví dụ màu xanh Cyan cổ điển) */
+                    color: #10b981 !important;
+
+                    /* 4. Hiệu ứng đèn LED phát sáng cho chữ */
+                    text-shadow: 0 0 2px rgba(0, 255, 204, 0.6), 0 0 10px rgba(0, 255, 204, 0.4);
+
+                    /* 5. Đổ bóng khối nặng và viền sáng lọt lòng phía trên nút */
+                    box-shadow: 0 4px 0px #050505, inset 0 1px 1px rgba(255, 255, 255, 0.15);
+
+                    transition: all 0.1s ease;
+                    outline: none;
+                    text-transform: uppercase;
+                }
+
+                /* Hiệu ứng khi di chuột qua: Nút sáng rực lên */
+                .deck-btn:hover {
+                    color: #fff !important;
+                    text-shadow: 0 0 8px rgba(0, 255, 204, 0.9), 0 0 15px rgba(0, 255, 204, 0.6);
+                    box-shadow: 0 4px 0px #050505, 0 0 10px rgba(0, 255, 204, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+                }
+
+                /* Hiệu ứng lún xuống chân thật khi bấm (Active) */
+                .deck-btn:active {
+                    transform: translateY(3px);
+                    box-shadow: 0 1px 0px #050505, inset 0 1px 3px rgba(0, 0, 0, 0.8);
+                }
+
+                .btn-rom-load,
+                .btn-reset,
+                .btn-save,
+                .btn-load {
+                    border-color: #2d2d2d;
+                }
+
+                /* Vintage channel knob style */
+                .channel-knob-wrapper {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 3px;
+                }
+
+                .channel-knob {
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #333, #151515);
+                    border: 3px solid #0a0a0a;
+                    position: relative;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.15);
+                    animation: rotateKnob 10s steps(8) infinite alternate;
+                }
+
+                .knob-indicator {
+                    width: 4px;
+                    height: 12px;
+                    background: #00E5FF;
+                    /* Retro cyan indicator color instead of red */
+                    position: absolute;
+                    top: 2px;
+                    left: 12px;
+                    border-radius: 2px;
+                }
+
+                .knob-label {
+                    font-size: 7px;
+                    font-weight: 900;
+                    color: #777;
+                    letter-spacing: 0.5px;
+                }
+
+                @keyframes rotateKnob {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+
+                    100% {
+                        transform: rotate(270deg);
+                    }
+                }
+
+                /* Brushed metal blue steel glow for active speed and filter keys */
+                #btn-speed-desktop.active-speed,
+                #btn-filter-desktop.active-filter {
+                    background: linear-gradient(180deg, #bbdefb 0%, #90caf9 40%, #64b5f6 60%, #2196f3 100%) !important;
+                    color: #0b3c5d !important;
+                    border-color: #0b3c5d;
+                    box-shadow:
+                        0 3px 0px #0b3c5d,
+                        inset 0 1px 0px rgba(255, 255, 255, 0.4);
+                }
+
+                /* Custom analog physical volume slider */
+                .deck-vol-control {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #0b0b0b;
+                    /* Pitch black inner channel track */
+                    border: 3px solid #1a1a1a;
+                    border-radius: 12px;
+                    padding: 5px 10px;
+                    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+                }
+
+                .vol-icon {
+                    font-size: 14px;
+                    color: #888;
+                    /* Silver grey speaker icon */
+                }
+
+                .retro-slider {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 90px !important;
+                    height: 8px !important;
+                    background: #1a1a1a !important;
+                    /* Cool dark track instead of red */
+                    border-radius: 4px;
+                    outline: none;
+                    margin: 0;
+                    padding: 0;
+                    border: none !important;
+                }
+
+                .retro-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    width: 14px;
+                    height: 22px;
+                    border-radius: 2px;
+                    background: linear-gradient(to right, #bdbdbd 0%, #eeeeee 40%, #e0e0e0 60%, #9e9e9e 100%);
+                    border: 2px solid #222222;
+                    cursor: pointer;
+                    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);
+                }
+
+                .vol-percentage {
+                    font-family: 'Courier New', Courier, monospace;
+                    font-weight: 900;
+                    font-size: 11px;
+                    color: #00f0ff;
+                    /* Bright retro high-tech ice-blue/cyan instead of green/red */
+                    text-shadow: 0 0 4px rgba(0, 240, 255, 0.6);
+                    min-width: 28px;
+                    text-align: right;
+                }
+
+                /* Keyboard Decal sticker panel below the TV */
+                .keyboard-legend-sticker {
+                    display: flex;
+                    background: #FFFDF9;
+                    border: 3.5px dashed var(--border-color);
+                    border-radius: 20px;
+                    padding: 15px 20px;
+                    width: 100%;
+                    max-width: 700px;
+                    box-sizing: border-box;
+                    gap: 20px;
+                    margin-top: 18px;
+                    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.05);
+                }
+
+                .sticker-col {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+
+                .sticker-title {
+                    font-family: 'Fredoka', sans-serif;
+                    font-weight: 800;
+                    font-size: 12px;
+                    color: var(--accent-red);
+                    letter-spacing: 0.5px;
+                    border-bottom: 2px dashed #E2E8F0;
+                    padding-bottom: 3px;
+                    margin-bottom: 4px;
+                    text-transform: uppercase;
+                }
+
+                .sticker-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 11.5px;
+                    font-weight: 700;
+                    color: var(--text-main);
+                }
+
+                .sticker-row span {
+                    color: var(--text-muted);
+                }
+
+                kbd {
+                    background-color: #FFFFFF;
+                    border: 2px solid var(--border-color);
+                    border-radius: 6px;
+                    box-shadow: 0 1.5px 0 var(--border-color);
+                    color: var(--text-main);
+                    display: inline-block;
+                    font-family: inherit;
+                    font-size: 9px;
+                    font-weight: 800;
+                    padding: 1px 4px;
+                    margin-left: 2px;
+                }
+            }
+    </style>
+</head>
+
+<body>
+
+    <!-- Toast container -->
+    <div id="toast-notice" class="toast">🎮 SAVED!</div>
+
+    <div class="container">
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <a href="../index.html" class="mobile-back-btn" title="Trang chủ">🏠︎</a>
+            <div class="sys-controls">
+                <!-- Nút Ngôn ngữ (Chỉ hiện trên desktop) -->
+                <div class="lang-switch-container desktop-only">
+                    <button class="lang-btn active" id="btn-lang-vi" onclick="changeLang('vi')">VI</button>
+                    <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
+                </div>
+
+                <button class="bar-btn mobile-only" id="btn-full">FULL</button>
+                <button class="bar-btn mobile-only" id="btn-theme">THEME</button>
+                <button class="bar-btn mobile-only" id="btn-filter">FILTER</button>
+                <button class="bar-btn mobile-only" id="btn-mute">MUTE</button>
+
+                <label for="rom-file" class="bar-btn file-input-label mobile-only" data-vi="NẠP ROM"
+                    data-en="LOAD ROM">ROM</label>
+                <input type="file" id="rom-file" accept=".nes">
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Quảng cáo cột bên trái (luôn hiện trên desktop) -->
+            <div class="desktop-ad-side desktop-ad-left desktop-only">
+                <!-- Cửa sổ tranh vuông 1 -->
+                <div class="square-picture-frame-ad">
+                    <div class="frame-inner">
+                        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                        <div class="ad-placeholder">[ GOOGLE ADS SQUARE ]</div>
+                    </div>
+                </div>
+
+                <!-- Cửa sổ tranh vuông 2 -->
+                <div class="square-picture-frame-ad">
+                    <div class="frame-inner">
+                        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                        <div class="ad-placeholder">[ GOOGLE ADS SQUARE ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khu vực chơi game -->
+            <div class="screen-area">
+                <!-- Floating back and language controls for desktop -->
+                <div class="desktop-floating-controls desktop-only">
+                    <a href="../index.html" class="back-btn" title="Trang chủ">🏠︎</a>
+                    <div class="lang-switch-container">
+                        <button class="lang-btn active" id="btn-lang-vi-float" onclick="changeLang('vi')">VI</button>
+                        <button class="lang-btn" id="btn-lang-en-float" onclick="changeLang('en')">EN</button>
+                    </div>
+                </div>
+
+                <div id="adsense-top-zone" class="mobile-only">
+                    <div class="ads-placeholder" data-vi="[ KHU VỰC QUẢNG CÁO ]" data-en="[ ADVERTISEMENT ZONE ]">[
+                        GOOGLE ADSENSE AD ZONE ]</div>
+                </div>
+
+                <!-- Hanging picture frame ad slot above the TV on desktop -->
+                <div class="picture-frame-ad desktop-only">
+                    <div class="frame-inner">
+                        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                        <div class="ad-placeholder">[ GOOGLE ADSENSE AD ZONE ]</div>
+                    </div>
+                </div>
+
+                <div class="tv-cabinet">
+                    <div class="tv-screen-wrapper" id="screen-box">
+                        <div id="virus-mascot" class="mobile-only"
+                            onclick="document.getElementById('rom-file').click();">😊</div>
+
+                        <!-- Single Canvas wrapper shared by both mobile and desktop -->
+                        <div class="canvas-wrapper" id="canvas-filter-shell">
+                            <canvas id="nes-canvas" width="256" height="240"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TV Controls Deck sitting standalone below the TV on desktop -->
+                <div class="tv-controls-deck desktop-only">
+                    <div class="speaker-grill">
+                        <span></span><span></span><span></span><span></span><span></span>
+                    </div>
+                    <div class="deck-main-controls">
+                        <div class="power-led-group">
+                            <span class="power-led-light" id="power-led"></span>
+                            <span class="power-led-label">POWER</span>
+                        </div>
+                        <label for="rom-file" class="deck-btn btn-rom-load" id="btn-rom-desktop" data-vi="📂 NẠP ROM"
+                            data-en="📂 LOAD ROM"
+                            style="cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">📂
+                            NẠP ROM</label>
+                        <button class="deck-btn btn-reset" id="btn-reset-desktop" data-vi="🔄 RESET"
+                            data-en="🔄 RESET">🔄 RESET</button>
+                        <button class="deck-btn btn-save" id="btn-save-desktop" data-vi="💾 SAVE" data-en="💾 SAVE">💾
+                            SAVE</button>
+                        <button class="deck-btn btn-load" id="btn-load-desktop" data-vi="⚡ LOAD" data-en="⚡ LOAD">⚡
+                            LOAD</button>
+                        <button class="deck-btn" id="btn-speed-desktop">SPEED x1</button>
+                        <button class="deck-btn" id="btn-filter-desktop">NORMAL</button>
+                        <button class="deck-btn" id="btn-full-desktop" title="Toàn màn hình">⛶</button>
+                    </div>
+                    <div class="deck-vol-control">
+                        <span class="vol-icon" id="mute-icon-desktop" style="cursor: pointer;">🔊</span>
+                        <input type="range" class="retro-slider" id="vol-control-desktop" min="0" max="100" value="50">
+                        <span class="vol-percentage" id="vol-percentage-deck">50%</span>
+                    </div>
+                </div>
+
+                <!-- Google Ad Panel below controls deck -->
+                <div class="desktop-ad-bottom desktop-only">
+                    <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                    <div class="ad-placeholder">[ GOOGLE ADSENSE AD ZONE ]</div>
+                </div>
+
+                <div class="sub-dashboard mobile-only">
+                    <div class="dash-vol-group">
+                        <span>🔊</span>
+                        <input type="range" class="volume-slider" id="vol-control" min="0" max="100" value="50">
+                    </div>
+                    <div class="dash-btn-group">
+                        <button class="dash-btn" id="btn-reset-mobile" data-vi="RESET" data-en="RESET">RESET</button>
+                        <button class="dash-btn" id="btn-speed">SPEED x1</button>
+                        <button class="dash-btn" id="btn-save">SAVE STATE</button>
+                        <button class="dash-btn" id="btn-load">LOAD STATE</button>
+                    </div>
+                </div>
+
+                <!-- Keyboard decal sticker panel below the TV -->
+                <div class="keyboard-legend-sticker desktop-only">
+                    <div class="sticker-col">
+                        <div class="sticker-title" data-vi="NGƯỜI CHƠI 1 (P1)" data-en="PLAYER 1 (P1)">NGƯỜI CHƠI 1 (P1)
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="🕹️ DI CHUYỂN (D-PAD):" data-en="🕹️ MOVE (D-PAD):">🕹️ DI CHUYỂN
+                                (D-PAD):</span>
+                            <span><kbd>W</kbd> <kbd>S</kbd> <kbd>A</kbd> <kbd>D</kbd></span>
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="🔴 NÚT A (FIRE):" data-en="🔴 BUTTON A (FIRE):">🔴 NÚT A (FIRE):</span>
+                            <span><kbd>Y</kbd></span>
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="🟡 NÚT B (TURBO):" data-en="🟡 BUTTON B (TURBO):">🟡 NÚT B (TURBO):</span>
+                            <span><kbd>T</kbd></span>
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="⏹️ SELECT / START:" data-en="⏹️ SELECT / START:">⏹️ SELECT / START:</span>
+                            <span><kbd>Space</kbd> / <kbd>Enter</kbd></span>
+                        </div>
+                    </div>
+                    <div class="sticker-col">
+                        <div class="sticker-title" data-vi="NGƯỜI CHƠI 2 (P2)" data-en="PLAYER 2 (P2)">NGƯỜI CHƠI 2 (P2)
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="🕹️ DI CHUYỂN (D-PAD):" data-en="🕹️ MOVE (D-PAD):">🕹️ DI CHUYỂN
+                                (D-PAD):</span>
+                            <span><kbd>I</kbd> <kbd>K</kbd> <kbd>J</kbd> <kbd>L</kbd></span>
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="🔴 NÚT A:" data-en="🔴 BUTTON A:">🔴 NÚT A:</span>
+                            <span><kbd>]</kbd></span>
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="🟡 NÚT B:" data-en="🟡 BUTTON B:">🟡 NÚT B:</span>
+                            <span><kbd>[</kbd></span>
+                        </div>
+                        <div class="sticker-row">
+                            <span data-vi="💾 LƯU / TẢI GAME:" data-en="💾 SAVE / LOAD STATE:">💾 LƯU / TẢI GAME:</span>
+                            <span><kbd>F6</kbd> / <kbd>F9</kbd></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quảng cáo cột bên phải (luôn hiện trên desktop) -->
+            <div class="desktop-ad-side desktop-ad-right desktop-only">
+                <!-- Cửa sổ tranh vuông 1 -->
+                <div class="square-picture-frame-ad">
+                    <div class="frame-inner">
+                        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                        <div class="ad-placeholder">[ GOOGLE ADS SQUARE ]</div>
+                    </div>
+                </div>
+
+                <!-- Cửa sổ tranh vuông 2 -->
+                <div class="square-picture-frame-ad">
+                    <div class="frame-inner">
+                        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                        <div class="ad-placeholder">[ GOOGLE ADS SQUARE ]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="gamepad theme-famicom mobile-only" id="virtual-gamepad">
+            <div class="dpad-center" id="dpad-anchor">
+                <div class="dpad-core"></div>
+                <div class="dpad-cross" id="dpad-graphics"></div>
+            </div>
+
+            <div class="center-btns">
+                <div class="sys-btn-container">
+                    <div class="sys-btn" id="btn-SELECT"></div>
+                    <div class="sys-label">SELECT</div>
+                </div>
+                <div class="sys-btn-container">
+                    <div class="sys-btn" id="btn-START"></div>
+                    <div class="sys-label">START</div>
+                </div>
+            </div>
+
+            <div class="action-group">
+                <div class="btn-wrapper" id="wrapper-B">
+                    <div class="action-btn" id="btn-B">B</div>
+                    <div class="action-label">TURBO</div>
+                </div>
+                <div class="btn-wrapper" id="wrapper-A">
+                    <div class="action-btn" id="btn-A">A</div>
+                    <div class="action-label">FIRE</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. KHỞI TẠO CƠ SỞ DỮ LIỆU INDEXEDDB (LƯU TRỮ VÔ HẠN)
+        // ==========================================
+        let db = null;
+        const DB_NAME = "DUYNQ2197_Emulator_DB_v2";
+        const STORE_SAVES = "game_saves";
+        const STORE_ROMS = "game_roms";
+
+        function initIndexedDB() {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onupgradeneeded = function (e) {
+                let database = e.target.result;
+                if (!database.objectStoreNames.contains(STORE_SAVES)) {
+                    database.createObjectStore(STORE_SAVES);
+                }
+                if (!database.objectStoreNames.contains(STORE_ROMS)) {
+                    database.createObjectStore(STORE_ROMS);
+                }
+            };
+            request.onsuccess = function (e) {
+                db = e.target.result;
+                checkAndAutoLoadLastRom();
+            };
+            request.onerror = function () { console.error("Không thể khởi tạo cơ sở dữ liệu IndexedDB."); };
+        }
+        initIndexedDB();
+
+        // ==========================================
+        // 2. CẤU HÌNH KHỞI TẠO JSNES & CANVAS
+        // ==========================================
+        const canvas = document.getElementById('nes-canvas');
+        const ctx = canvas.getContext('2d');
+        let imageData = ctx.createImageData(256, 240);
+        let pixelBuffer = new Uint32Array(imageData.data.buffer);
+
+        const BUTTON_MAP = {
+            A: jsnes.Controller.BUTTON_A, B: jsnes.Controller.BUTTON_B,
+            SELECT: jsnes.Controller.BUTTON_SELECT, START: jsnes.Controller.BUTTON_START,
+            UP: jsnes.Controller.BUTTON_UP, DOWN: jsnes.Controller.BUTTON_DOWN,
+            LEFT: jsnes.Controller.BUTTON_LEFT, RIGHT: jsnes.Controller.BUTTON_RIGHT
+        };
+
+        let isMuted = false;
+        let globalVolume = 0.5;
+        let speedMultiplier = 1;
+
+        const nes = new jsnes.NES({
+            onFrame: function (buffer) {
+                let i = 0, p = 0;
+                while (i < 61440) { pixelBuffer[i++] = buffer[p++] | 0xFF000000; }
+                ctx.putImageData(imageData, 0, 0);
+            },
+            onAudioSample: function (left, right) {
+                if (isMuted || speedMultiplier > 1) return;
+                if (audioContext && audioBufferQueue) {
+                    audioBufferQueue.push(left * globalVolume, right * globalVolume);
+                }
+            },
+            sampleRate: 44100
+        });
+
+        const volMobile = document.getElementById('vol-control');
+        const volDesktop = document.getElementById('vol-control-desktop');
+        function syncVolume(val) {
+            globalVolume = parseInt(val) / 100;
+            if (volMobile) volMobile.value = val;
+            if (volDesktop) volDesktop.value = val;
+            const pct = document.getElementById('vol-percentage-deck');
+            if (pct) pct.innerText = val + "%";
+
+            // Premium Volume Drag UX: Auto-unmute when dragging up, auto-mute when dragging to 0
+            if (globalVolume > 0 && isMuted) {
+                isMuted = false;
+                const btnMute = document.getElementById('btn-mute');
+                if (btnMute) {
+                    btnMute.innerText = "MUTE";
+                    btnMute.style.background = "#333";
+                }
+                const iconDesktop = document.getElementById('mute-icon-desktop');
+                if (iconDesktop) iconDesktop.innerText = "🔊";
+            } else if (globalVolume === 0 && !isMuted) {
+                isMuted = true;
+                const btnMute = document.getElementById('btn-mute');
+                if (btnMute) {
+                    btnMute.innerText = "UNMUTE";
+                    btnMute.style.background = "#8A1C14";
+                }
+                const iconDesktop = document.getElementById('mute-icon-desktop');
+                if (iconDesktop) iconDesktop.innerText = "🔇";
+            }
+        }
+        if (volMobile) volMobile.addEventListener('input', (e) => syncVolume(e.target.value));
+        if (volDesktop) volDesktop.addEventListener('input', (e) => syncVolume(e.target.value));
+
+        // ==========================================
+        // 3. LOGIC ĐIỀU KHIỂN CHUẨN ĐA ĐIỂM + KHÓA NÚT KHI DI CHUYỂN
+        // ==========================================
+        const gamepad = document.getElementById('virtual-gamepad');
+        const dpadGfx = document.getElementById('dpad-graphics');
+        const btnA = document.getElementById('btn-A');
+        const btnB = document.getElementById('btn-B');
+        const btnSelect = document.getElementById('btn-SELECT');
+        const btnStart = document.getElementById('btn-START');
+
+        let currentPressed = new Set();
+        let turboInterval = null;
+        let isMovingDpad = false;
+
+        function startTurbo() {
+            if (turboInterval) return;
+            let state = false;
+            turboInterval = setInterval(() => {
+                if (currentPressed.has('B')) {
+                    state = !state;
+                    if (state) nes.buttonDown(1, BUTTON_MAP.B);
+                    else nes.buttonUp(1, BUTTON_MAP.B);
+                }
+            }, 50);
+        }
+
+        function stopTurbo() {
+            clearInterval(turboInterval);
+            turboInterval = null;
+        }
+
+        function updateButtons(newPressed) {
+            for (let btn of currentPressed) {
+                if (!newPressed.has(btn)) {
+                    if (btn !== 'B') nes.buttonUp(1, BUTTON_MAP[btn]);
+                    setVisualState(btn, false);
+                }
+            }
+            for (let btn of newPressed) {
+                if (!currentPressed.has(btn)) {
+                    if (btn !== 'B') nes.buttonDown(1, BUTTON_MAP[btn]);
+                    setVisualState(btn, true);
+                }
+            }
+
+            if (newPressed.has('B') && !currentPressed.has('B')) startTurbo();
+            if (!newPressed.has('B') && currentPressed.has('B')) {
+                stopTurbo();
+                nes.buttonUp(1, BUTTON_MAP.B);
+            }
+
+            currentPressed = newPressed;
+        }
+
+        function setVisualState(btn, isActive) {
+            if (['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(btn)) {
+                dpadGfx.classList.toggle(`active-${btn.toLowerCase()}`, isActive);
+            } else {
+                const el = document.getElementById(`btn-${btn}`);
+                if (el) el.classList.toggle('active', isActive);
+            }
+        }
+
+        function processTouchData(e) {
+            const nextPressed = new Set();
+            const padRect = gamepad.getBoundingClientRect();
+            const midX = padRect.left + padRect.width / 2;
+
+            const dpadRect = document.getElementById('dpad-anchor').getBoundingClientRect();
+            const dpadCenterX = dpadRect.left + dpadRect.width / 2;
+            const dpadCenterY = dpadRect.top + dpadRect.height / 2;
+
+            const rectA = btnA.getBoundingClientRect();
+            const cAX = rectA.left + rectA.width / 2;
+            const cAY = rectA.top + rectA.height / 2;
+
+            const rectB = btnB.getBoundingClientRect();
+            const cBX = rectB.left + rectB.width / 2;
+            const cBY = rectB.top + rectB.height / 2;
+
+            const rSelect = btnSelect.getBoundingClientRect();
+            const cSelX = rSelect.left + rSelect.width / 2;
+            const cSelY = rSelect.top + rSelect.height / 2;
+
+            const rStart = btnStart.getBoundingClientRect();
+            const cStaX = rStart.left + rStart.width / 2;
+            const cStaY = rStart.top + rStart.height / 2;
+
+            let dpadTouchDetected = false;
+
+            for (let i = 0; i < e.touches.length; i++) {
+                const t = e.touches[i];
+                const tx = t.clientX;
+                const ty = t.clientY;
+
+                const distSelect = Math.sqrt((tx - cSelX) ** 2 + (ty - cSelY) ** 2);
+                const distStart = Math.sqrt((tx - cStaX) ** 2 + (ty - cStaY) ** 2);
+
+                if (distSelect < 42) { nextPressed.add('SELECT'); continue; }
+                if (distStart < 42) { nextPressed.add('START'); continue; }
+
+                if (tx < midX) {
+                    const dx = tx - dpadCenterX;
+                    const dy = ty - dpadCenterY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance > 15 && distance < 110) {
+                        dpadTouchDetected = true;
+                        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+                        if (angle >= -112.5 && angle < -67.5) { nextPressed.add('UP'); }
+                        else if (angle >= -67.5 && angle < -22.5) { nextPressed.add('UP'); nextPressed.add('RIGHT'); }
+                        else if (angle >= -22.5 && angle < 22.5) { nextPressed.add('RIGHT'); }
+                        else if (angle >= 22.5 && angle < 67.5) { nextPressed.add('DOWN'); nextPressed.add('RIGHT'); }
+                        else if (angle >= 67.5 && angle < 112.5) { nextPressed.add('DOWN'); }
+                        else if (angle >= 112.5 && angle < 157.5) { nextPressed.add('DOWN'); nextPressed.add('LEFT'); }
+                        else if (angle >= 157.5 || angle < -157.5) { nextPressed.add('LEFT'); }
+                        else if (angle >= -157.5 && angle < -112.5) { nextPressed.add('UP'); nextPressed.add('LEFT'); }
+                    }
+                } else {
+                    const distA = Math.sqrt((tx - cAX) ** 2 + (ty - cAY) ** 2);
+                    const distB = Math.sqrt((tx - cBX) ** 2 + (ty - cBY) ** 2);
+
+                    if (distA < 45) nextPressed.add('A');
+                    if (distB < 45) nextPressed.add('B');
+                }
+            }
+            isMovingDpad = dpadTouchDetected;
+            updateButtons(nextPressed);
+        }
+
+        gamepad.addEventListener('touchstart', (e) => { e.preventDefault(); initAudio(); processTouchData(e); }, { passive: false });
+        gamepad.addEventListener('touchmove', (e) => { e.preventDefault(); processTouchData(e); }, { passive: false });
+        gamepad.addEventListener('touchend', (e) => { e.preventDefault(); processTouchData(e); }, { passive: false });
+        gamepad.addEventListener('touchcancel', (e) => { e.preventDefault(); processTouchData(e); }, { passive: false });
+        canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        document.getElementById('screen-box').addEventListener('touchstart', () => { initAudio(); });
+
+        // ==========================================
+        // 4. QUẢN LÝ ÂM THANH (AUDIO CONTEXT VÁ LỖI CHROME ANDROID)
+        // ==========================================
+        let audioContext = null;
+        let audioBufferQueue = [];
+        const BUFFER_SIZE = 2048;
+
+        function initAudio() {
+            if (audioContext) {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                return;
+            }
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            audioContext = new AudioContextClass({ sampleRate: 44100 });
+            const scriptProcessor = audioContext.createScriptProcessor(BUFFER_SIZE, 0, 2);
+
+            scriptProcessor.onaudioprocess = function (e) {
+                const leftOutput = e.outputBuffer.getChannelData(0);
+                const rightOutput = e.outputBuffer.getChannelData(1);
+
+                for (let i = 0; i < BUFFER_SIZE; i++) {
+                    if (audioBufferQueue.length >= 2) {
+                        leftOutput[i] = audioBufferQueue.shift();
+                        rightOutput[i] = audioBufferQueue.shift();
+                    } else {
+                        leftOutput[i] = 0; rightOutput[i] = 0;
+                    }
+                }
+                if (audioBufferQueue.length > BUFFER_SIZE * 4) { audioBufferQueue = []; }
+            };
+
+            scriptProcessor.connect(audioContext.destination);
+        }
+
+        document.addEventListener('touchstart', function () {
+            initAudio();
+        }, { passive: true });
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btnMute = document.getElementById('btn-mute');
+            btnMute.innerText = isMuted ? "UNMUTE" : "MUTE";
+            btnMute.style.background = isMuted ? "#8A1C14" : "#333";
+            const iconDesktop = document.getElementById('mute-icon-desktop');
+            if (iconDesktop) iconDesktop.innerText = isMuted ? "🔇" : "🔊";
+            audioBufferQueue = [];
+            if (audioContext) audioContext.resume();
+
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            showToast(isMuted ? (savedLang === 'vi' ? "🔇 Đã tắt tiếng" : "🔇 Muted") : (savedLang === 'vi' ? "🔊 Đã bật tiếng" : "🔊 Unmuted"), "success");
+        }
+        document.getElementById('btn-mute').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            toggleMute();
+        });
+        const muteIconDesktop = document.getElementById('mute-icon-desktop');
+        if (muteIconDesktop) muteIconDesktop.addEventListener('click', toggleMute);
+
+        // ==========================================
+        // 5. QUẢN LÝ TUA NHANH (LOẠI BỎ x8 -> CHỈ CÒN x1 -> x2 -> x4)
+        // ==========================================
+        function toggleSpeed() {
+            if (speedMultiplier === 1) speedMultiplier = 2;
+            else if (speedMultiplier === 2) speedMultiplier = 4;
+            else speedMultiplier = 1;
+
+            const btnSpeed = document.getElementById('btn-speed');
+            const btnSpeedDesktop = document.getElementById('btn-speed-desktop');
+
+            const text = `SPEED x${speedMultiplier}`;
+            btnSpeed.innerText = text;
+            if (btnSpeedDesktop) btnSpeedDesktop.innerText = text;
+
+            if (speedMultiplier === 1) {
+                btnSpeed.style.background = "#2a2a2a";
+                btnSpeed.style.color = "#ccc";
+                btnSpeed.style.borderColor = "#555";
+                if (btnSpeedDesktop) {
+                    btnSpeedDesktop.style.background = "";
+                    btnSpeedDesktop.style.color = "";
+                    btnSpeedDesktop.style.borderColor = "";
+                }
+            } else {
+                btnSpeed.style.background = "#8A1C14";
+                btnSpeed.style.color = "#fff";
+                btnSpeed.style.borderColor = "#ff0055";
+                if (btnSpeedDesktop) {
+                    btnSpeedDesktop.style.background = "var(--accent-red)";
+                    btnSpeedDesktop.style.color = "#fff";
+                    btnSpeedDesktop.style.borderColor = "var(--border-color)";
+                }
+            }
+
+            audioBufferQueue = [];
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            showToast((savedLang === 'vi' ? "⚡ Tốc độ: x" : "⚡ Speed: x") + speedMultiplier, "success");
+        }
+        document.getElementById('btn-speed').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            toggleSpeed();
+        });
+        const btnSpeedDesktop = document.getElementById('btn-speed-desktop');
+        if (btnSpeedDesktop) btnSpeedDesktop.addEventListener('click', toggleSpeed);
+
+        // ==========================================
+        // 6. QUẢN LÝ ĐỔI THEME TAY CẦM
+        // ==========================================
+        const themeModes = ['famicom', 'vice', 'matcha', 'sakura', 'gameboy', 'neon', 'midnight'];
+        let currentThemeIndex = 0;
+
+        document.getElementById('btn-theme').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            gamepad.className = "gamepad";
+
+            currentThemeIndex = (currentThemeIndex + 1) % themeModes.length;
+            const activeTheme = themeModes[currentThemeIndex];
+
+            gamepad.classList.add(`theme-${activeTheme}`);
+
+            const originalText = this.innerText;
+            this.innerText = activeTheme.toUpperCase();
+            setTimeout(() => this.innerText = "THEME", 800);
+        });
+
+        // ==========================================
+        // 7. QUẢN LÝ BỘ LỌC RETRO FILTER SCREEN
+        // ==========================================
+        const filterShell = document.getElementById('canvas-filter-shell');
+        const filterModes = ['normal', 'pixel', 'crt', 'warm', 'mono', 'cyber', 'gbgreen'];
+        let currentFilterIndex = 0;
+
+        function cycleFilter() {
+            filterShell.className = "canvas-wrapper";
+            currentFilterIndex = (currentFilterIndex + 1) % filterModes.length;
+            const activeMode = filterModes[currentFilterIndex];
+
+            if (activeMode !== 'normal') {
+                filterShell.classList.add(`filter-${activeMode}`);
+            }
+
+            const btnFilter = document.getElementById('btn-filter');
+            const btnFilterDesktop = document.getElementById('btn-filter-desktop');
+
+            const text = activeMode.toUpperCase();
+            btnFilter.innerText = text;
+            if (btnFilterDesktop) btnFilterDesktop.innerText = text;
+
+            btnFilter.style.background = activeMode === 'normal' ? "#333" : "#1e5323";
+            if (btnFilterDesktop) {
+                btnFilterDesktop.style.background = activeMode === 'normal' ? "" : "var(--accent-green)";
+                btnFilterDesktop.style.color = activeMode === 'normal' ? "" : "#fff";
+            }
+
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            showToast((savedLang === 'vi' ? "📺 Bộ lọc: " : "📺 Filter: ") + text, "success");
+        }
+        document.getElementById('btn-filter').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            cycleFilter();
+        });
+        const btnFilterDesktop = document.getElementById('btn-filter-desktop');
+        if (btnFilterDesktop) btnFilterDesktop.addEventListener('click', cycleFilter);
+
+        // ==========================================
+        // 8. LOGIC SAVE / LOAD & TỰ ĐỘNG LƯU TRẠNG THÁI
+        // ==========================================
+        let currentRomName = "default_game";
+        let currentRomBinaryData = null;
+
+        function autoLoadState(romName) {
+            if (!db) return;
+            const transaction = db.transaction([STORE_SAVES], "readonly");
+            const store = transaction.objectStore(STORE_SAVES);
+            const request = store.get(romName);
+
+            request.onsuccess = function (e) {
+                const savedData = e.target.result;
+                if (savedData) {
+                    nes.fromJSON(savedData);
+                    const apu = nes.papu || nes.apu;
+                    if (apu && typeof apu.reset === 'function') {
+                        apu.reset();
+                    }
+                    if (apu && typeof apu.writeReg === 'function') {
+                        apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to prevent silent save states
+                    }
+                    initAudio();
+                    console.log("Auto-loaded last save state for: " + romName);
+                    audioBufferQueue = [];
+                }
+            };
+        }
+
+        function autoSaveState() {
+            if (!isRomLoaded || !db) return;
+            try {
+                const snapshot = nes.toJSON();
+                const transaction = db.transaction([STORE_SAVES], "readwrite");
+                const store = transaction.objectStore(STORE_SAVES);
+                store.put(snapshot, currentRomName);
+                console.log("Auto-saved last state for: " + currentRomName);
+            } catch (err) {
+                console.error("Auto-save execution failed", err);
+            }
+        }
+
+        function checkAndAutoLoadLastRom() {
+            if (!db) return;
+            const transaction = db.transaction([STORE_ROMS], "readonly");
+            const store = transaction.objectStore(STORE_ROMS);
+            const request = store.get("last_played_rom");
+
+            request.onsuccess = function (e) {
+                const romRecord = e.target.result;
+                if (romRecord && romRecord.binaryData) {
+                    currentRomName = romRecord.name;
+                    currentRomBinaryData = romRecord.binaryData;
+                    try {
+                        nes.loadROM(romRecord.binaryData);
+                        isRomLoaded = true;
+                        document.documentElement.classList.remove('rom-not-loaded');
+                        document.documentElement.classList.add('rom-loaded');
+
+                        document.querySelector('.file-input-label').innerText = "ROM";
+                        const mascot = document.getElementById('virus-mascot');
+                        if (mascot) mascot.remove();
+
+                        setTimeout(() => {
+                            autoLoadState(currentRomName);
+                        }, 400);
+                    } catch (err) {
+                        console.error("Lỗi nạp ROM tự động từ DB:", err);
+                    }
+                }
+            };
+        }
+
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === 'hidden') {
+                autoSaveState();
+            }
+        });
+
+        document.getElementById('btn-save').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            if (!isRomLoaded) {
+                showToast(savedLang === 'vi' ? "⚠️ Vui lòng tải ROM trước!" : "⚠️ Please load a ROM first!", "warning");
+                return;
+            }
+            if (!db) {
+                showToast(savedLang === 'vi' ? "⚠️ Bộ lưu trữ chưa sẵn sàng!" : "⚠️ Storage not ready yet!", "warning");
+                return;
+            }
+
+            try {
+                const snapshot = nes.toJSON();
+                const transaction = db.transaction([STORE_SAVES], "readwrite");
+                const store = transaction.objectStore(STORE_SAVES);
+                const request = store.put(snapshot, currentRomName);
+
+                const btn = this;
+                request.onsuccess = function () {
+                    const originalText = btn.innerText;
+                    btn.innerText = "SAVED!";
+                    setTimeout(() => btn.innerText = originalText, 1000);
+                    showToast(savedLang === 'vi' ? "💾 ĐÃ LƯU TRẠNG THÁI GAME!" : "💾 GAME STATE SAVED!", "success");
+                };
+            } catch (err) {
+                showToast(savedLang === 'vi' ? "❌ Không thể chụp Snapshot hệ thống." : "❌ Failed to take system snapshot.", "danger");
+            }
+        });
+
+        document.getElementById('btn-load').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            if (!isRomLoaded) {
+                showToast(savedLang === 'vi' ? "⚠️ Vui lòng tải ROM trước!" : "⚠️ Please load a ROM first!", "warning");
+                return;
+            }
+            if (!db) {
+                showToast(savedLang === 'vi' ? "⚠️ Bộ lưu trữ chưa sẵn sàng!" : "⚠️ Storage not ready yet!", "warning");
+                return;
+            }
+
+            const transaction = db.transaction([STORE_SAVES], "readonly");
+            const store = transaction.objectStore(STORE_SAVES);
+            const request = store.get(currentRomName);
+
+            const btn = this;
+            request.onsuccess = function (e) {
+                const savedData = e.target.result;
+                if (!savedData) {
+                    showToast(savedLang === 'vi' ? "⚠️ Không tìm thấy dữ liệu save!" : "⚠️ No save state found for this game!", "warning");
+                    return;
+                }
+
+                nes.fromJSON(savedData);
+                const apu = nes.papu || nes.apu;
+                if (apu && typeof apu.reset === 'function') {
+                    apu.reset();
+                }
+                if (apu && typeof apu.writeReg === 'function') {
+                    apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to prevent silent save states
+                }
+                initAudio();
+                const originalText = btn.innerText;
+                btn.innerText = "LOADED!";
+                setTimeout(() => btn.innerText = originalText, 1000);
+                audioBufferQueue = [];
+                showToast(savedLang === 'vi' ? "⚡ ĐÃ TẢI LẠI TRẠNG THÁI GAME!" : "⚡ GAME STATE LOADED!", "success");
+            };
+        });
+
+        // ==========================================
+        // 9. BẬT TẮT CHẾ ĐỘ FULLSCREEN TOÀN MÀN HÌNH
+        // ==========================================
+        function toggleFullscreen() {
+            const btnFull = document.getElementById('btn-full');
+            const btnFullDesktop = document.getElementById('btn-full-desktop');
+
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                }
+                btnFull.innerText = "EXIT";
+                if (btnFullDesktop) btnFullDesktop.innerHTML = "🗗";
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+                btnFull.innerText = "FULL";
+                if (btnFullDesktop) btnFullDesktop.innerHTML = "⛶";
+            }
+        }
+        document.getElementById('btn-full').addEventListener('click', function () {
+            toggleFullscreen();
+        });
+        const btnFullDesktop = document.getElementById('btn-full-desktop');
+        if (btnFullDesktop) btnFullDesktop.addEventListener('click', toggleFullscreen);
+
+        document.addEventListener('fullscreenchange', () => {
+            const btnFull = document.getElementById('btn-full');
+            const btnFullDesktop = document.getElementById('btn-full-desktop');
+            const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
+
+            if (isFull) {
+                btnFull.innerText = "EXIT";
+                if (btnFullDesktop) btnFullDesktop.innerHTML = "🗗";
+            } else {
+                btnFull.innerText = "FULL";
+                if (btnFullDesktop) btnFullDesktop.innerHTML = "⛶";
+            }
+        });
+
+        // ==========================================
+        // 10. VÒNG LẶP ĐỒNG BỘ TỐC ĐỘ ỔN ĐỊNH FPS & SỰ KIỆN NẠP ROM MỚI
+        // ==========================================
+        let isRomLoaded = false;
+        let lastFrameTime = 0;
+        const fpsInterval = 1000 / 60.098;
+
+        function gameLoop(timestamp) {
+            requestAnimationFrame(gameLoop);
+
+            if (isRomLoaded) {
+                if (!lastFrameTime) lastFrameTime = timestamp;
+                let elapsed = timestamp - lastFrameTime;
+                if (elapsed > 100) elapsed = fpsInterval;
+
+                while (elapsed >= (fpsInterval / speedMultiplier)) {
+                    nes.frame();
+                    elapsed -= (fpsInterval / speedMultiplier);
+                }
+                lastFrameTime = timestamp - elapsed;
+            }
+        }
+
+        document.getElementById('rom-file').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (isRomLoaded) {
+                autoSaveState();
+            }
+
+            const cleanRomName = file.name.replace(/\s+/g, '_');
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                try {
+                    const binaryData = event.target.result;
+                    currentRomBinaryData = binaryData;
+                    nes.loadROM(binaryData);
+                    isRomLoaded = true;
+                    document.documentElement.classList.remove('rom-not-loaded');
+                    document.documentElement.classList.add('rom-loaded');
+                    currentRomName = cleanRomName;
+
+                    document.querySelector('.file-input-label').innerText = "ROM";
+
+                    const mascot = document.getElementById('virus-mascot');
+                    if (mascot) mascot.remove();
+
+                    initAudio();
+
+                    if (db) {
+                        const transaction = db.transaction([STORE_ROMS], "readwrite");
+                        const store = transaction.objectStore(STORE_ROMS);
+                        store.put({ name: currentRomName, binaryData: binaryData }, "last_played_rom");
+                    }
+
+                    setTimeout(() => {
+                        autoLoadState(currentRomName);
+                    }, 400);
+
+                } catch (err) {
+                    const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                    showToast(savedLang === 'vi' ? "❌ Định dạng tệp tin ROM .nes không hợp lệ!" : "❌ Invalid .nes ROM file format!", "danger");
+                }
+            };
+            reader.readAsBinaryString(file);
+        });
+
+        requestAnimationFrame(gameLoop);
+
+        // ==========================================
+        // 11. BỔ SUNG LẮNG NGHE SỰ KIỆN BÀN PHÍM CHO 2 NGƯỜI CHƠI TRÊN DESKTOP
+        // ==========================================
+        const KEY_MAPS_P1 = {
+            "KeyW": jsnes.Controller.BUTTON_UP,
+            "KeyS": jsnes.Controller.BUTTON_DOWN,
+            "KeyA": jsnes.Controller.BUTTON_LEFT,
+            "KeyD": jsnes.Controller.BUTTON_RIGHT,
+            "KeyT": jsnes.Controller.BUTTON_B,
+            "KeyY": jsnes.Controller.BUTTON_A,
+            "Space": jsnes.Controller.BUTTON_SELECT,
+            "Enter": jsnes.Controller.BUTTON_START
+        };
+
+        const KEY_MAPS_P2 = {
+            "KeyI": jsnes.Controller.BUTTON_UP,
+            "KeyK": jsnes.Controller.BUTTON_DOWN,
+            "KeyJ": jsnes.Controller.BUTTON_LEFT,
+            "KeyL": jsnes.Controller.BUTTON_RIGHT,
+            "BracketLeft": jsnes.Controller.BUTTON_B,
+            "BracketRight": jsnes.Controller.BUTTON_A
+        };
+
+        window.addEventListener("keydown", function (e) {
+            initAudio();
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // F6: Save State, F9: Load State
+            if (e.code === "F6") {
+                e.preventDefault();
+                document.getElementById('btn-save').click();
+                return;
+            }
+            if (e.code === "F9") {
+                e.preventDefault();
+                document.getElementById('btn-load').click();
+                return;
+            }
+
+            // Player 1
+            if (KEY_MAPS_P1[e.code] !== undefined) {
+                e.preventDefault();
+                nes.buttonDown(1, KEY_MAPS_P1[e.code]);
+                highlightVisualButton(e.code, true);
+            }
+            // Player 2
+            if (KEY_MAPS_P2[e.code] !== undefined) {
+                e.preventDefault();
+                nes.buttonDown(2, KEY_MAPS_P2[e.code]);
+            }
+        });
+
+        window.addEventListener("keyup", function (e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            // Player 1
+            if (KEY_MAPS_P1[e.code] !== undefined) {
+                e.preventDefault();
+                nes.buttonUp(1, KEY_MAPS_P1[e.code]);
+                highlightVisualButton(e.code, false);
+            }
+            // Player 2
+            if (KEY_MAPS_P2[e.code] !== undefined) {
+                e.preventDefault();
+                nes.buttonUp(2, KEY_MAPS_P2[e.code]);
+            }
+        });
+
+        function highlightVisualButton(code, isActive) {
+            let btn = null;
+            if (code === "KeyW") btn = "UP";
+            else if (code === "KeyS") btn = "DOWN";
+            else if (code === "KeyA") btn = "LEFT";
+            else if (code === "KeyD") btn = "RIGHT";
+            else if (code === "KeyY") btn = "A";
+            else if (code === "KeyT") btn = "B";
+            else if (code === "Space") btn = "SELECT";
+            else if (code === "Enter") btn = "START";
+
+            if (btn) setVisualState(btn, isActive);
+        }
+
+        // ==========================================
+        // 12. BỔ SUNG CÁC TÍNH NĂNG ĐỒNG BỘ DESKTOP MỚI
+        // ==========================================
+        window.showToast = function (msg, type = "success") {
+            const toast = document.getElementById("toast-notice");
+            if (!toast) return;
+            toast.innerText = msg;
+            toast.className = "toast active " + type;
+            setTimeout(() => { toast.classList.remove("active"); }, 1800);
+        };
+
+        window.changeLang = function (lang) {
+            localStorage.setItem('selected_lang', lang);
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.id.includes('lang-' + lang)) {
+                    btn.classList.add('active');
+                }
+            });
+            if (lang === 'vi') {
+                document.documentElement.lang = 'vi';
+                document.title = "Trình Giả Lập NES Online - Chơi Game Điện Tử Bốn Nút 8-Bit Cực Mượt";
+            } else {
+                document.documentElement.lang = 'en';
+                document.title = "NES Emulator Online - Play Retro 8-Bit NES Games";
+            }
+            document.querySelectorAll('[data-vi]').forEach(el => {
+                const text = lang === 'vi' ? el.getAttribute('data-vi') : el.getAttribute('data-en');
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') { el.placeholder = text; }
+                else { el.innerHTML = text; }
+            });
+            // Fullscreen desktop button uses a clean icon, no translation required
+        };
+
+        window.resetGame = function () {
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            if (!isRomLoaded || !currentRomBinaryData) {
+                showToast(savedLang === 'vi' ? "⚠️ Vui lòng tải ROM trước!" : "⚠️ Please load a ROM first!", "warning");
+                return;
+            }
+            try {
+                isRomLoaded = false;
+                audioBufferQueue = [];
+                nes.loadROM(currentRomBinaryData);
+                const apu = nes.papu || nes.apu;
+                if (apu && typeof apu.reset === 'function') {
+                    apu.reset();
+                }
+                if (apu && typeof apu.writeReg === 'function') {
+                    apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to ensure sound is on
+                }
+                initAudio();
+                lastFrameTime = 0;
+                isRomLoaded = true;
+                showToast(savedLang === 'vi' ? "🔄 ĐÃ KHỞI ĐỘNG LẠI GAME!" : "🔄 GAME REBOOTED!", "success");
+            } catch (err) {
+                console.error("Reset failed", err);
+                try {
+                    nes.reset();
+                    const apu = nes.papu || nes.apu;
+                    if (apu && typeof apu.reset === 'function') {
+                        apu.reset();
+                    }
+                    if (apu && typeof apu.writeReg === 'function') {
+                        apu.writeReg(0x4015, 0x1F); // Force-enable all sound channels to ensure sound is on
+                    }
+                    initAudio();
+                    lastFrameTime = 0;
+                    isRomLoaded = true;
+                    showToast(savedLang === 'vi' ? "🔄 ĐÃ KHỞI ĐỘNG LẠI GAME!" : "🔄 GAME REBOOTED!", "success");
+                } catch (err2) {
+                    showToast(savedLang === 'vi' ? "❌ Lỗi khởi động lại game!" : "❌ Error resetting game!", "danger");
+                }
+            }
+        };
+
+        // Bind Reset Buttons
+        const btnResetDesktop = document.getElementById('btn-reset-desktop');
+        if (btnResetDesktop) btnResetDesktop.addEventListener('click', window.resetGame);
+        const btnResetMobile = document.getElementById('btn-reset-mobile');
+        if (btnResetMobile) btnResetMobile.addEventListener('click', window.resetGame);
+
+        // Bind Desktop Save/Load Deck Click Listeners
+        const btnSaveDesktop = document.getElementById('btn-save-desktop');
+        if (btnSaveDesktop) btnSaveDesktop.addEventListener('click', () => {
+            document.getElementById('btn-save').click();
+        });
+        const btnLoadDesktop = document.getElementById('btn-load-desktop');
+        if (btnLoadDesktop) btnLoadDesktop.addEventListener('click', () => {
+            document.getElementById('btn-load').click();
+        });
+
+        // Initialize drag and drop
+        const screenZone = document.getElementById('screen-box');
+        if (screenZone) {
+            screenZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (window.innerWidth >= 1024) {
+                    screenZone.style.background = '#FFFDF2';
+                    screenZone.style.borderColor = 'var(--accent-red)';
+                }
+            });
+            screenZone.addEventListener('dragleave', () => {
+                screenZone.style.background = '';
+                screenZone.style.borderColor = '';
+            });
+            screenZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                screenZone.style.background = '';
+                screenZone.style.borderColor = '';
+                const file = e.dataTransfer.files[0];
+                if (file && file.name.toLowerCase().endsWith('.nes')) {
+                    document.getElementById('rom-file').files = e.dataTransfer.files;
+                    const changeEvent = new Event('change');
+                    document.getElementById('rom-file').dispatchEvent(changeEvent);
+                } else {
+                    const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                    showToast(savedLang === 'vi' ? "⚠️ Vui lòng thả đúng tệp tin ROM định dạng .nes!" : "⚠️ Please drop a valid .nes NES ROM file!", "warning");
+                }
+            });
+        }
+
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        window.addEventListener('drop', (e) => {
+            e.preventDefault();
+        });
+
+        // Sync initial language
+        const savedLang = localStorage.getItem('selected_lang') || 'vi';
+        window.changeLang(savedLang);
+
+        document.addEventListener("click", function () {
+            initAudio();
+        }, { once: true });
+        document.addEventListener("touchstart", function () {
+            initAudio();
+        }, { once: true });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Trình giả lập NES và SNES chất lượng cao trên trình duyệt Web. Không cần cài đặt, tải tệp ROM của riêng bạn và chơi trực tuyến tức thời. Hỗ trợ lưu game (Save State), tay cầm ảo và bàn phím máy tính.">
+    <meta name="keywords"
+        content="retro game emulator, gia lap nes, gia lap snes, choi game nes online, choi game snes online, retro games, nes emulator, snes emulator">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://retro-game-emulator-portal.vercel.app/index.html">
+    <title>Trình Giả Lập Game Retro Online - Chơi NES & SNES Cực Mượt</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300..700&family=Lexend:wght@300..800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #FAF8F2;
+            /* Soft warm cream */
+            --panel-color: #FFFFFF;
+            /* Pure white */
+            --border-color: #2E3A59;
+            /* Bold slate dark navy */
+            --accent-red: #FF6B6B;
+            /* Cute retro red */
+            --accent-purple: #B176F0;
+            /* Soft SNES purple */
+            --accent-blue: #4EA8DE;
+            /* Sky blue */
+            --accent-yellow: #FFD166;
+            /* Warm retro yellow */
+            --accent-green: #06D6A0;
+            /* Mint green */
+            --text-main: #2E3A59;
+            --text-muted: #6E768E;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(rgba(110, 118, 142, 0.12) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            font-family: 'Fredoka', 'Lexend', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Playful Floating Retro Elements */
+        .decor-star {
+            position: absolute;
+            font-size: 28px;
+            animation: bounceMascot 2.5s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+            filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.15));
+            user-select: none;
+        }
+
+        .decor-star-1 {
+            top: 7%;
+            left: 6%;
+            color: var(--accent-yellow);
+        }
+
+        .decor-star-2 {
+            top: 11%;
+            right: 7%;
+            color: var(--accent-blue);
+            animation-delay: 0.6s;
+        }
+
+        .decor-star-3 {
+            bottom: 18%;
+            left: 4%;
+            color: var(--accent-red);
+            animation-delay: 1.2s;
+        }
+
+        .decor-star-4 {
+            bottom: 22%;
+            right: 5%;
+            color: var(--accent-green);
+            animation-delay: 1.8s;
+        }
+
+        @keyframes bounceMascot {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+
+            100% {
+                transform: translateY(-15px) rotate(15deg) scale(1.1);
+            }
+        }
+
+        /* LANGUAGE SWITCH CONTAINER */
+        .lang-switch-container {
+            display: flex;
+            justify-content: flex-end;
+            max-width: 1100px;
+            width: 100%;
+            margin: 15px auto 0;
+            padding: 0 20px;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .lang-btn {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 8px 14px;
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 2px 2px 0px var(--border-color);
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .lang-btn:hover {
+            background: var(--accent-yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px var(--border-color);
+        }
+
+        .lang-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-blue);
+            color: #FFFFFF;
+        }
+
+        /* ADSENSE LAYOUTS - NEOBRUTALISM BOXES */
+        .ad-container {
+            width: 100%;
+            max-width: 970px;
+            margin: 15px auto;
+            padding: 10px;
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 4px 4px 0px var(--border-color);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .ad-label {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .ad-placeholder {
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            border: 2px dashed #CBD5E1;
+            background: #F8FAFC;
+            border-radius: 12px;
+        }
+
+        /* HEADER CHÍNH */
+        header {
+            width: 100%;
+            padding: 20px 20px 10px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-container {
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        .logo-main {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 42px;
+            color: var(--text-main);
+            text-shadow:
+                3px 3px 0px var(--accent-yellow),
+                -1px -1px 0px var(--panel-color),
+                1px -1px 0px var(--panel-color),
+                -1px 1px 0px var(--panel-color),
+                1px 1px 0px var(--panel-color);
+            letter-spacing: 1px;
+            -webkit-text-stroke: 1.5px var(--border-color);
+        }
+
+        .logo-sub {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        /* TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM - BUBBLY CHAT MASCOT */
+        .disclaimer-section {
+            max-width: 800px;
+            width: calc(100% - 40px);
+            margin: 20px auto 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            z-index: 10;
+            position: relative;
+        }
+
+        .mascot-avatar {
+            font-size: 42px;
+            background: var(--accent-yellow);
+            border: 3px solid var(--border-color);
+            width: 74px;
+            height: 74px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 4px 4px 0px var(--border-color);
+            animation: bounceMascotMini 2.5s infinite alternate ease-in-out;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        @keyframes bounceMascotMini {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                transform: translateY(-8px) scale(1.05);
+            }
+        }
+
+        .disclaimer-bubble {
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 24px;
+            padding: 16px 22px;
+            box-shadow: 5px 5px 0px var(--border-color);
+            position: relative;
+            flex: 1;
+            font-family: 'Fredoka', 'Lexend', sans-serif;
+            font-size: 14.5px;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+
+        .disclaimer-bubble::before {
+            content: "";
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 8px 15px 8px 0;
+            border-style: solid;
+            border-color: transparent var(--border-color) transparent transparent;
+            display: block;
+            width: 0;
+        }
+
+        .disclaimer-bubble::after {
+            content: "";
+            position: absolute;
+            left: -11px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-width: 7px 12px 7px 0;
+            border-style: solid;
+            border-color: transparent #FFFFFF transparent transparent;
+            display: block;
+            width: 0;
+        }
+
+        .terminal-prompt {
+            color: var(--accent-red);
+            font-weight: 800;
+            margin-right: 6px;
+        }
+
+        .terminal-blink {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--border-color);
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 3px;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .disclaimer-section {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .disclaimer-bubble::before,
+            .disclaimer-bubble::after {
+                display: none;
+            }
+        }
+
+        /* MAIN CONTENT - CÁC HỆ MÁY GIẢ LẬP */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 1100px;
+            margin: 10px auto 40px;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 35px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* RETRO CARD - TOYLIKE JOYCON STYLE */
+        .system-card {
+            background-color: var(--panel-color);
+            border: 3px solid var(--border-color);
+            border-radius: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            box-shadow: 5px 5px 0px var(--border-color);
+        }
+
+        .card-nes {
+            background: #FFF9F9;
+        }
+
+        .card-snes {
+            background: #FAF8FF;
+        }
+
+        .system-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.4), transparent);
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+        .system-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 9px 9px 0px var(--border-color);
+        }
+
+        .card-header-art {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: rgba(255, 255, 255, 0.5);
+            overflow: hidden;
+            padding: 20px;
+            transition: background 0.4s;
+            border-bottom: 3px solid var(--border-color);
+        }
+
+        .system-card:hover .card-header-art {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .svg-icon {
+            width: 100%;
+            height: 100%;
+            max-width: 240px;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .system-card:hover .svg-icon {
+            transform: scale(1.08) rotate(2deg);
+        }
+
+        /* Chi tiết nội dung CARD */
+        .card-body {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .badge-8bit {
+            align-self: flex-start;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            padding: 5px 9px;
+            border-radius: 30px;
+            margin-bottom: 15px;
+            border: 2px solid var(--border-color);
+            box-shadow: 2px 2px 0px var(--border-color);
+            font-weight: bold;
+        }
+
+        .card-nes .badge-8bit {
+            background-color: var(--accent-yellow);
+            color: var(--border-color);
+        }
+
+        .card-snes .badge-8bit {
+            background-color: var(--accent-blue);
+            color: #FFFFFF;
+        }
+
+        .card-title {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 26px;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        /* Nút Chơi game kiểu arcade */
+        .card-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            border: 3px solid var(--border-color);
+            cursor: pointer;
+            box-shadow: 3px 3px 0px var(--border-color);
+            transition: all 0.15s ease;
+            display: inline-block;
+        }
+
+        .card-nes .card-btn {
+            background-color: var(--accent-red);
+            color: #FFFFFF;
+        }
+
+        .card-nes:hover .card-btn {
+            background-color: #ff8787;
+        }
+
+        .card-nes:active .card-btn {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+
+        .card-snes .card-btn {
+            background-color: var(--accent-purple);
+            color: #FFFFFF;
+        }
+
+        .card-snes:hover .card-btn {
+            background-color: #c597f5;
+        }
+
+        .card-snes:active .card-btn {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+
+        /* CHI TIẾT TÍNH NĂNG NỔI BẬT */
+        .features-section {
+            margin: 40px auto 10px;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .features-title {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .features-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .feature-item {
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px 20px;
+            box-shadow: 4px 4px 0px var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .feature-item:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 7px 7px 0px var(--border-color);
+            background: #FFFDF9;
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: inline-block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.06));
+        }
+
+        .feature-item h3 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .feature-item p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* FOOTER CHÍNH */
+        footer {
+            width: 100%;
+            padding: 25px 20px;
+            text-align: center;
+            border-top: 3px solid var(--border-color);
+            background-color: #FFFFFF;
+            margin-top: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .footer-highlight {
+            color: var(--accent-red);
+            font-weight: 800;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Playful Floating Stars -->
+    <div class="decor-star decor-star-1">⭐</div>
+    <div class="decor-star decor-star-2">✨</div>
+    <div class="decor-star decor-star-3">🎮</div>
+    <div class="decor-star decor-star-4">🚀</div>
+
+    <!-- LANGUAGE SWITCH BAR -->
+    <div class="lang-switch-container">
+        <button class="lang-btn active" id="btn-lang-vi" onclick="changeLang('vi')">VI</button>
+        <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
+    </div>
+
+    <!-- ZONE QUẢNG CÁO GOOGLE ADSENSE TOP -->
+    <div class="ad-container" id="adsense-homepage-top">
+        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+        <div class="ad-placeholder">
+            <!-- Nơi hiển thị mã tự động chèn quảng cáo từ extends.js -->
+            [ GOOGLE ADSENSE BANNER AUTO ]
+        </div>
+    </div>
+
+    <!-- HEADER CHÍNH -->
+    <header>
+        <div class="logo-container">
+            <h1 class="logo-main" id="site-h1" data-vi="TRẠM RETRO" data-en="RETRO STATION">TRẠM RETRO</h1>
+        </div>
+        <p class="logo-sub" data-vi="Trình Giả Lập Trò Chơi Cổ Điển Trực Tuyến Hàng Đầu"
+            data-en="The Premier Online Classic Game Emulator">Trình Giả Lập Trò Chơi Cổ Điển Trực Tuyến Hàng Đầu</p>
+    </header>
+
+    <!-- MAIN HỆ THỐNG -->
+    <main>
+
+        <!-- TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM (DISCLAIMER) -->
+        <section class="disclaimer-section" aria-label="Tuyên bố miễn trừ trách nhiệm">
+            <div class="mascot-avatar">👾</div>
+            <div class="disclaimer-bubble">
+                <p style="margin: 0; font-weight: 600;">
+                    <span class="terminal-prompt" data-vi="LƯU Ý:" data-en="NOTICE:">LƯU Ý:</span><span
+                        id="disclaimer-text"
+                        data-vi="Hệ thống chạy giả lập trực tiếp trên trình duyệt của bạn (Client-Side). Chúng tôi hoàn toàn KHÔNG cung cấp hay lưu trữ ROM game. Vui lòng tự tải tệp tin game của riêng bạn (.nes hoặc .sfc/.smc) để bắt đầu chơi!"
+                        data-en="This emulator runs directly in your browser (Client-Side). We do NOT provide or host any ROM files. Please upload your own local game files (.nes or .sfc/.smc) to play!">Hệ
+                        thống chạy giả lập trực tiếp trên trình duyệt của bạn (Client-Side). Chúng tôi hoàn toàn KHÔNG
+                        cung cấp hay lưu trữ ROM game. Vui lòng tự tải tệp tin game của riêng bạn (.nes hoặc .sfc/.smc)
+                        để bắt đầu chơi!</span><span class="terminal-blink"></span>
+                </p>
+            </div>
+        </section>
+
+        <!-- GRID CHỌN HỆ MÁY -->
+        <section class="grid-container" aria-label="Lựa chọn hệ máy chơi game">
+
+            <!-- THẺ MÁY NES -->
+            <a href="__Emulator/Nes.html" class="system-card card-nes" id="card-nes-emulator">
+                <div class="card-header-art">
+                    <!-- Vẽ tay cầm NES Console bằng SVG xịn xò -->
+                    <svg class="svg-icon" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Thân tay cầm NES màu xám -->
+                        <rect x="10" y="5" width="180" height="70" rx="8" fill="#e2e8f0" stroke="#2e3a59"
+                            stroke-width="3" />
+                        <rect x="15" y="10" width="170" height="60" rx="5" fill="#f8fafc" />
+                        <!-- Miếng viền màu đỏ đậm bao quanh -->
+                        <rect x="25" y="15" width="150" height="50" rx="3" fill="#475569" />
+                        <!-- Chữ Nintendo / NES -->
+                        <text x="100" y="27" font-family="'Press Start 2P', monospace" font-size="6" fill="#ff6b6b"
+                            text-anchor="middle">NES CLASSIC</text>
+                        <!-- Cụm D-pad màu đen -->
+                        <path d="M 45,25 L 45,45 M 35,35 L 55,35" stroke="#1e293b" stroke-width="6"
+                            stroke-linecap="square" />
+                        <!-- Select và Start màu xám đen -->
+                        <rect x="75" y="45" width="14" height="4" rx="1.5" fill="#94a3b8" stroke="#1e293b"
+                            stroke-width="1.5" />
+                        <rect x="95" y="45" width="14" height="4" rx="1.5" fill="#94a3b8" stroke="#1e293b"
+                            stroke-width="1.5" />
+                        <text x="82" y="56" font-family="sans-serif" font-size="3" font-weight="bold" fill="#fff"
+                            text-anchor="middle">SELECT</text>
+                        <text x="102" y="56" font-family="sans-serif" font-size="3" font-weight="bold" fill="#fff"
+                            text-anchor="middle">START</text>
+                        <!-- Nút hành động tròn màu đỏ A / B -->
+                        <circle cx="138" cy="45" r="7" fill="#ff6b6b" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="158" cy="45" r="7" fill="#ff6b6b" stroke="#1e293b" stroke-width="2" />
+                        <text x="138" y="59" font-family="sans-serif" font-size="4" font-weight="bold" fill="#fff"
+                            text-anchor="middle">B</text>
+                        <text x="158" y="59" font-family="sans-serif" font-size="4" font-weight="bold" fill="#fff"
+                            text-anchor="middle">A</text>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="badge-8bit" data-vi="HỆ MÁY 8-BIT" data-en="8-BIT CONSOLE">HỆ MÁY 8-BIT</span>
+                    <h2 class="card-title" data-vi="Giả Lập NES" data-en="NES Emulator">Giả Lập NES</h2>
+                    <p class="card-desc"
+                        data-vi="Hệ máy Nintendo Entertainment System (Điện tử 4 nút) huyền thoại. Chạy mượt mà các tựa game đỉnh cao từ ROM của bạn."
+                        data-en="The legendary 8-bit Nintendo Entertainment System. Play classics game smoothly from your ROM files.">
+                        Hệ máy Nintendo Entertainment System (Điện tử 4 nút)...</p>
+                    <button class="card-btn" type="button" data-vi="CHƠI NGAY 🚀" data-en="PLAY NOW 🚀">CHƠI NGAY
+                        🚀</button>
+                </div>
+            </a>
+
+            <!-- THẺ MÁY SNES -->
+            <a href="__Emulator/Snes.html" class="system-card card-snes" id="card-snes-emulator">
+                <div class="card-header-art">
+                    <!-- Vẽ tay cầm SNES Console / Super Famicom bằng SVG xịn xò -->
+                    <svg class="svg-icon" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Thân tay cầm SNES bo tròn màu xám nhẹ -->
+                        <rect x="20" y="5" width="160" height="70" rx="28" fill="#e2e8f0" stroke="#2e3a59"
+                            stroke-width="3" />
+                        <path d="M 40,5 C 20,25 20,55 40,75 L 160,75" fill="none" />
+                        <!-- Khu vực phím màu xám đậm hơn -->
+                        <rect x="40" y="15" width="120" height="50" rx="10" fill="#cbd5e1" opacity="0.6" />
+                        <!-- Cụm D-pad màu đen nhám -->
+                        <path d="M 50,25 L 50,45 M 40,35 L 60,35" stroke="#1e293b" stroke-width="7"
+                            stroke-linecap="square" />
+                        <!-- Select và Start chéo -->
+                        <line x1="78" y1="48" x2="90" y2="42" stroke="#64748b" stroke-width="3"
+                            stroke-linecap="round" />
+                        <line x1="98" y1="48" x2="110" y2="42" stroke="#64748b" stroke-width="3"
+                            stroke-linecap="round" />
+                        <!-- 4 nút màu sắc chéo đặc trưng của Super Famicom -->
+                        <!-- Nút X (Xanh dương) phía trên -->
+                        <circle cx="138" cy="27" r="5" fill="#3b82f6" stroke="#1e293b" stroke-width="1.5" />
+                        <!-- Nút Y (Xanh lá) phía trái -->
+                        <circle cx="126" cy="38" r="5" fill="#10b981" stroke="#1e293b" stroke-width="1.5" />
+                        <!-- Nút B (Vàng) phía dưới -->
+                        <circle cx="138" cy="49" r="5" fill="#f59e0b" stroke="#1e293b" stroke-width="1.5" />
+                        <!-- Nút A (Đỏ) phía phải -->
+                        <circle cx="150" cy="38" r="5" fill="#ef4444" stroke="#1e293b" stroke-width="1.5" />
+
+                        <!-- Nhãn chữ -->
+                        <text x="100" y="27" font-family="'Press Start 2P', monospace" font-size="5" fill="#b176f0"
+                            text-anchor="middle">SNES Wasm</text>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="badge-8bit" data-vi="HỆ MÁY 16-BIT" data-en="16-BIT CONSOLE">HỆ MÁY 16-BIT</span>
+                    <h2 class="card-title" data-vi="Giả Lập SNES" data-en="SNES Emulator">Giả Lập SNES</h2>
+                    <p class="card-desc"
+                        data-vi="Hỗ trợ giả lập hệ máy 16-bit cổ điển thông qua tệp ROM (.snes) do bạn tự cung cấp."
+                        data-en="Supports emulating classic 16-bit systems via custom ROM files (.snes) that you provide.">
+                        Hệ máy Super Nintendo Entertainment System...</p>
+                    <button class="card-btn" type="button" data-vi="CHƠI NGAY 🚀" data-en="PLAY NOW 🚀">CHƠI NGAY
+                        🚀</button>
+                </div>
+            </a>
+
+        </section>
+
+        <!-- TÍNH NĂNG NỔI BẬT -->
+        <section class="features-section" aria-label="Tính năng vượt trội">
+            <h3 class="features-title" data-vi="🎯 ƯU ĐIỂM CỦA HỆ THỐNG" data-en="🎯 SYSTEM FEATURES">ƯU ĐIỂM CỦA HỆ
+                THỐNG</h3>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <span class="feature-icon">💾</span>
+                    <h3 data-vi="Lưu Game Tự Động" data-en="Auto Save State">Lưu Game Tự Động</h3>
+                    <p data-vi="Hệ thống tự lưu trạng thái (Save State) liên tục bằng IndexedDB cục bộ, giúp bạn chơi tiếp bất cứ lúc nào mà không sợ mất file save."
+                        data-en="Automatically saves your game state to local IndexedDB. Resume your nostalgic journey instantly at any time.">
+                        Hệ thống tự lưu...</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🎮</span>
+                    <h3 data-vi="Hỗ Trợ Bàn Phím" data-en="Keyboard & Gamepad">Hỗ Trợ Bàn Phím</h3>
+                    <p data-vi="Tương thích hoàn hảo bàn phím máy tính (P1 & P2 trên Desktop) cùng tay cầm ảo mượt mà trên di động cho trải nghiệm nguyên bản."
+                        data-en="Fully supports computer keyboards (P1 & P2 on Desktop) and intuitive virtual touch controllers on mobile devices.">
+                        Tương thích hoàn hảo...</p>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">📺</span>
+                    <h3 data-vi="Bộ Lọc Retro Đẹp Mắt" data-en="Retro CRT Filters">Bộ Lọc Retro Đẹp Mắt</h3>
+                    <p data-vi="Khôi phục nét hoài cổ nguyên bản với các bộ lọc màn hình CRT cổ điển, tối ưu hóa hiển thị pixel nghệ thuật sống động."
+                        data-en="Nostalgic CRT screen scanlines and filters to bring back warm, vivid childhood gaming memories.">
+                        Khôi phục nét hoài cổ...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ZONE QUẢNG CÁO GOOGLE ADSENSE BOTTOM -->
+    <div class="ad-container" id="adsense-homepage-bottom">
+        <div class="ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+        <div class="ad-placeholder">
+            [ GOOGLE ADSENSE BANNER AUTO ]
+        </div>
+    </div>
+
+    <!-- FOOTER CHÍNH -->
+    <footer>
+        <p class="footer-text"
+            data-vi="© 2026 Retro Station. Vận hành bởi DuyNQ2197@gmail.com. Bản quyền phần mềm giả lập thuộc về cộng đồng mã nguồn mở."
+            data-en="© 2026 Retro Station. Powered by DuyNQ2197@gmail.com. Emulator cores belong to the open-source community.">
+            © 2026 Retro Station. Vận hành bởi <span class="footer-highlight">DuyNQ2197@gmail.com</span>. Bản quyền phần
+            mềm giả
+            lập thuộc về cộng đồng mã nguồn mở.
+        </p>
+    </footer>
+
+    <!-- Tự động bơm mã quảng cáo Google Adsense và Google Analytics từ file extends.js -->
+    <script src="extends.js"></script>
+
+    <!-- HỆ THỐNG DỊCH THUẬT ĐA NGÔN NGỮ CHUYÊN NGHIỆP -->
+    <script>
+        // Hàm chuyển đổi ngôn ngữ
+        function changeLang(lang) {
+            // Lưu lựa chọn ngôn ngữ
+            localStorage.setItem('selected_lang', lang);
+
+            // Cập nhật trạng thái nút tích cực
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            if (lang === 'vi') {
+                document.getElementById('btn-lang-vi').classList.add('active');
+                document.documentElement.lang = 'vi';
+            } else {
+                document.getElementById('btn-lang-en').classList.add('active');
+                document.documentElement.lang = 'en';
+            }
+
+            // Dịch tất cả các thẻ có thuộc tính data-vi và data-en
+            document.querySelectorAll('[data-vi]').forEach(el => {
+                const text = lang === 'vi' ? el.getAttribute('data-vi') : el.getAttribute('data-en');
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = text;
+                } else {
+                    el.innerHTML = text;
+                }
+            });
+
+            // Tối ưu SEO tiêu đề & mô tả cho từng ngôn ngữ
+            if (lang === 'vi') {
+                document.title = "Trình Giả Lập Game Retro Online - Chơi NES & SNES Cực Mượt";
+                document.querySelector('meta[name="description"]').setAttribute('content', 'Trình giả lập NES và SNES chất lượng cao trên trình duyệt Web. Không cần cài đặt, tải tệp ROM của riêng bạn và chơi trực tuyến tức thì. Hỗ trợ lưu game (Save State), tay cầm ảo và bàn phím máy tính.');
+            } else {
+                document.title = "Retro Game Emulator Online - Play NES & SNES Games";
+                document.querySelector('meta[name="description"]').setAttribute('content', 'High-quality online NES and SNES web-based emulator. No install required, load your own ROM files and play instantly with save states, gamepad and keyboard support.');
+            }
+        }
+
+        // Tự động tải ngôn ngữ đã chọn khi mở trang
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            changeLang(savedLang);
+        });
+    </script>
+</body>
+
+</html>

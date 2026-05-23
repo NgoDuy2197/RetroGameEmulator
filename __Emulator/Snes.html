@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Trình giả lập SNES (Super Nintendo / Điện tử đĩa mềm 16-bit) trực tuyến cực mượt. Tương thích tay cầm, bàn phím máy tính. Tải tệp ROM cục bộ của bạn để bắt đầu chơi.">
+    <meta name="keywords" content="gia lap snes, choi game snes online, retro snes emulator, snes online">
+    <title>Trình Giả Lập SNES Online - Chơi Game Super Nintendo 16-Bit Cực Mượt</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300..700&family=Lexend:wght@300..800&display=swap" rel="stylesheet">
+    
+    <script src="../extends.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #FAF8F2; /* Cream white */
+            --panel-color: #FFFFFF; /* Pure white */
+            --border-color: #2E3A59; /* Slate navy */
+            --accent-purple: #B176F0; /* Soft violet purple */
+            --accent-red: #FF6B6B; /* Cute red */
+            --accent-blue: #4EA8DE; /* Sky blue */
+            --accent-yellow: #FFD166; /* Warm yellow */
+            --accent-green: #06D6A0; /* Mint green */
+            --text-main: #2E3A59;
+            --text-muted: #6E768E;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(rgba(110, 118, 142, 0.1) 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+            font-family: 'Fredoka', 'Lexend', sans-serif;
+            overflow: hidden;
+            position: fixed;
+            color: var(--text-main);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Thanh công cụ phía trên */
+        .top-bar {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            background: #FFFFFF;
+            border-bottom: 3px solid var(--border-color);
+            z-index: 10;
+            gap: 10px;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid var(--border-color);
+            background: var(--accent-red);
+            color: #FFFFFF;
+            font-size: 16px;
+            font-weight: 900;
+            text-decoration: none;
+            box-shadow: 2px 2px 0px var(--border-color);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: #ff8787;
+            transform: translate(-1.5px, -1.5px);
+            box-shadow: 3px 3px 0px var(--border-color);
+        }
+
+        .back-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+
+        .logo {
+            color: var(--text-main);
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sys-controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .bar-btn {
+            background: #FFFFFF;
+            color: var(--text-main);
+            padding: 6px 12px;
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px var(--border-color);
+            text-transform: uppercase;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bar-btn:hover {
+            background: var(--accent-yellow);
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px var(--border-color);
+        }
+
+        .bar-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+
+        .file-input-label { 
+            background: var(--accent-purple); 
+            color: #FFFFFF;
+        }
+        .file-input-label:hover {
+            background: #c597f5;
+        }
+        #snes-rom-file { display: none; }
+
+        /* LANGUAGE SWITCH IN TOPBAR */
+        .lang-switch-container {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .lang-btn {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 11px;
+            padding: 4px 8px;
+            background: #FFFFFF;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 1.5px 1.5px 0px var(--border-color);
+            transition: all 0.1s ease;
+        }
+        
+        .lang-btn.active {
+            background: var(--accent-blue);
+            color: #FFFFFF;
+        }
+
+        /* ZONE QUẢNG CÁO MOBILE */
+        #adsense-top-zone {
+            width: 100%;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+            min-height: 50px;
+            text-align: center;
+        }
+        .ads-placeholder {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* GIAO DIỆN CHÍNH */
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .screen-area {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        /* Màn hình chờ nạp ROM */
+        .screen-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            padding: 15px;
+        }
+
+        .welcome-box {
+            text-align: center;
+            max-width: 500px;
+            color: var(--text-main);
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 5px 5px 0px var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .welcome-box:hover {
+            transform: scale(1.01);
+        }
+
+        .welcome-mascot {
+            font-size: 55px;
+            animation: float 2.5s ease-in-out infinite;
+            cursor: pointer;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            user-select: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .welcome-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent-purple);
+            letter-spacing: 0.5px;
+        }
+
+        .welcome-desc {
+            font-size: 14.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        /* Terminal style disclaimer in light theme */
+        .terminal-disclaimer {
+            font-family: 'Fredoka', sans-serif;
+            background: #FFF5F5;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 12px 18px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: var(--text-main);
+            text-align: left;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .disclaimer-prefix {
+            color: var(--accent-red);
+            font-weight: 800;
+            margin-right: 5px;
+        }
+
+        /* Container của EmulatorJS */
+        .game-wrapper {
+            width: 100%;
+            height: 100%;
+            display: none;
+            background: #000000;
+            position: relative;
+        }
+
+        #ejs-game {
+            width: 100%;
+            height: 100%;
+        }
+
+        .desktop-sidebar {
+            display: none;
+        }
+
+        /* TỔI ƯU DESKTOP TRÊN MÀN HÌNH LỚN */
+        @media (min-width: 1024px) {
+            body, html {
+                overflow: hidden;
+                position: fixed;
+            }
+            .container {
+                flex-direction: column !important;
+                height: 100vh;
+            }
+            #adsense-top-zone {
+                display: none !important;
+            }
+            .main-layout {
+                flex-direction: row !important;
+                flex: 1;
+                overflow: hidden;
+                height: calc(100% - 48px);
+            }
+            .screen-area {
+                flex: 1;
+                height: 100%;
+                border-right: 3px solid var(--border-color);
+            }
+            
+            /* Sidebar styling */
+            .desktop-sidebar {
+                display: flex;
+                flex-direction: column;
+                width: 350px;
+                background: #FFFFFF;
+                height: 100%;
+                overflow-y: auto;
+                padding: 20px;
+                color: var(--text-main);
+                gap: 20px;
+                border-left: 1px solid rgba(0, 0, 0, 0.05);
+            }
+            .sidebar-title {
+                font-family: 'Fredoka', sans-serif;
+                font-size: 16px;
+                font-weight: 800;
+                color: var(--accent-purple);
+                letter-spacing: 0.5px;
+                border-bottom: 3px solid var(--border-color);
+                padding-bottom: 8px;
+                text-transform: uppercase;
+            }
+            .controls-legend {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                background: #FFFDF9;
+                border: 3px solid var(--border-color);
+                border-radius: 16px;
+                padding: 15px;
+                box-shadow: 3px 3px 0px var(--border-color);
+            }
+            .legend-header {
+                font-size: 13px;
+                font-weight: 800;
+                color: var(--accent-blue);
+                letter-spacing: 0.5px;
+                margin-bottom: 5px;
+                text-transform: uppercase;
+                text-align: center;
+            }
+            .legend-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+                border-bottom: 1.5px dashed #E2E8F0;
+                padding-bottom: 6px;
+            }
+            .legend-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .legend-key {
+                display: flex;
+                gap: 3px;
+            }
+            kbd {
+                background-color: #FFFFFF;
+                border: 2px solid var(--border-color);
+                border-radius: 6px;
+                box-shadow: 0 1.5px 0 var(--border-color);
+                color: var(--text-main);
+                display: inline-block;
+                font-family: inherit;
+                font-size: 10px;
+                font-weight: 800;
+                padding: 2px 6px;
+            }
+            .legend-desc {
+                color: var(--text-muted);
+                font-size: 11.5px;
+                font-weight: 700;
+            }
+            .sidebar-ad-zone {
+                background: #F8FAFC;
+                border: 2px dashed #CBD5E1;
+                border-radius: 12px;
+                padding: 10px;
+                text-align: center;
+                margin-top: auto;
+            }
+            .sidebar-ad-label {
+                font-size: 9px;
+                color: var(--text-muted);
+                letter-spacing: 0.5px;
+                margin-bottom: 6px;
+                font-weight: bold;
+            }
+            .sidebar-ad-placeholder {
+                min-height: 120px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                color: var(--text-muted);
+                background: #FFFFFF;
+                border: 2.5px dashed #CBD5E1;
+                border-radius: 8px;
+                font-weight: 600;
+            }
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #FFFFFF;
+            border: 3px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 24px;
+            font-weight: 800;
+            font-size: 14.5px;
+            z-index: 99999;
+            box-shadow: 4px 4px 0px var(--border-color);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.active {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast.success {
+            background: var(--accent-green);
+            color: #FFFFFF;
+        }
+        .toast.warning {
+            background: var(--accent-yellow);
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast container -->
+    <div id="toast-notice" class="toast">🎮 SAVED!</div>
+
+    <div class="container">
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <div class="logo-wrapper">
+                <a href="../index.html" class="back-btn" title="Trang chủ">←</a>
+                <div class="logo" data-vi="🎮 SUPER FAMICOM" data-en="🎮 SUPER NINTENDO">🎮 SUPER FAMICOM</div>
+            </div>
+            
+            <div class="sys-controls">
+                <!-- Nút Ngôn ngữ -->
+                <div class="lang-switch-container">
+                    <button class="lang-btn active" id="btn-lang-vi" onclick="changeLang('vi')">VI</button>
+                    <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
+                </div>
+                
+                <label for="snes-rom-file" class="bar-btn file-input-label" data-vi="NẠP ROM" data-en="LOAD ROM">NẠP ROM</label>
+                <input type="file" id="snes-rom-file" accept=".sfc,.smc">
+            </div>
+        </div>
+
+        <!-- ZONE QUẢNG CÁO MOBILE -->
+        <div id="adsense-top-zone">
+            <div class="ads-placeholder" data-vi="[ KHU VỰC QUẢNG CÁO ]" data-en="[ ADVERTISEMENT ZONE ]">[ KHU VỰC QUẢNG CÁO ]</div>
+        </div>
+
+        <div class="main-layout">
+            <!-- Khu vực chơi game -->
+            <div class="screen-area">
+                <!-- 1. Màn hình chào khi chưa tải game -->
+                <div class="screen-container" id="screen-loading">
+                    <div class="welcome-box">
+                        <div class="welcome-mascot" onclick="document.getElementById('snes-rom-file').click();">👾</div>
+                        <h2 class="welcome-title" data-vi="Super Nintendo Online" data-en="Super Nintendo Online">Super Nintendo Online</h2>
+                        <p class="welcome-desc" data-vi="Kéo và thả tệp tin ROM SNES (.sfc, .smc) của bạn vào đây hoặc click vào biểu tượng máy game phía trên để bắt đầu tải ROM và trải nghiệm game 16-Bit tuyệt hảo." data-en="Drag & drop your SNES ROM file (.sfc, .smc) here or click the alien icon above to load your ROM and enjoy premium 16-bit gameplay instantly.">Kéo và thả tệp tin ROM SNES (.sfc, .smc) của bạn vào đây hoặc click vào biểu tượng máy game phía trên để bắt đầu tải ROM và trải nghiệm game 16-Bit tuyệt hảo.</p>
+                        
+                        <!-- Disclaimer dạng terminal -->
+                        <div class="terminal-disclaimer">
+                            <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:" data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span id="disclaimer-text" data-vi="Hệ thống chạy giả lập hoàn toàn dưới máy khách (Client-Side). Chúng tôi không lưu trữ hoặc phân phối bất kỳ tệp tin ROM nào trên máy chủ." data-en="The system runs emulators fully client-side on your device. We do not store or distribute any ROM files on our server.">Hệ thống chạy giả lập hoàn toàn dưới máy khách (Client-Side). Chúng tôi không lưu trữ hoặc phân phối bất kỳ tệp tin ROM nào trên máy chủ.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Khung chứa giả lập SNES -->
+                <div class="game-wrapper" id="game-container">
+                    <div id="ejs-game"></div>
+                </div>
+            </div>
+
+            <!-- BẢNG ĐIỀU KHIỂN DESKTOP CHỈ HIỆN TRÊN MÁY TÍNH -->
+            <div class="desktop-sidebar">
+                <div class="sidebar-title" data-vi="BẢNG ĐIỀU KHIỂN SNES" data-en="SNES CONTROL DECK">BẢNG ĐIỀU KHIỂN SNES</div>
+                
+                <div class="controls-legend">
+                    <div class="legend-header" data-vi="PHÍM CHƠI MÁY TÍNH" data-en="COMPUTER KEYBOARD">PHÍM CHƠI MÁY TÍNH</div>
+                    
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd></span>
+                        <span class="legend-desc" data-vi="DI CHUYỂN (D-PAD)" data-en="MOVE (D-PAD)">DI CHUYỂN (D-PAD)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>X</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT A" data-en="BUTTON A">NÚT A</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Z</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT B" data-en="BUTTON B">NÚT B</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>S</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT X" data-en="BUTTON X">NÚT X</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>A</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT Y" data-en="BUTTON Y">NÚT Y</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Q</kbd></span>
+                        <span class="legend-desc" data-vi="VAI TRÁI L" data-en="SHOULDER L">VAI TRÁI L</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>W</kbd></span>
+                        <span class="legend-desc" data-vi="VAI PHẢI R" data-en="SHOULDER R">VAI PHẢI R</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Shift</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT LỰA CHỌN (SELECT)" data-en="SELECT BUTTON">NÚT LỰA CHỌN (SELECT)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Enter</kbd></span>
+                        <span class="legend-desc" data-vi="BẮT ĐẦU (START)" data-en="START GAME">BẮT ĐẦU (START)</span>
+                    </div>
+                    
+                    <!-- F6 and F9 visual key guide -->
+                    <div class="legend-item" style="border-top: 2px dashed var(--border-color); margin-top: 5px; padding-top: 8px;">
+                        <span class="legend-key"><kbd>F6</kbd></span>
+                        <span class="legend-desc" data-vi="LƯU NHANH (SAVE)" data-en="QUICK SAVE">LƯU NHANH (SAVE)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>F9</kbd></span>
+                        <span class="legend-desc" data-vi="NẠP NHANH (LOAD)" data-en="QUICK LOAD">NẠP NHANH (LOAD)</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-ad-zone" id="adsense-snes-sidebar">
+                    <div class="sidebar-ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                    <div class="sidebar-ad-placeholder">
+                        [ GOOGLE ADSENSE SIDEBAR AD ]
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hàm hiển thị Toast thông báo siêu đẹp
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById("toast-notice");
+            toast.innerText = msg;
+            toast.className = "toast active " + type;
+            setTimeout(() => {
+                toast.classList.remove("active");
+            }, 1800);
+        }
+
+        // Lắng nghe sự kiện tải ROM
+        document.getElementById('snes-rom-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    // Chuyển tệp tin cục bộ thành Blob URL an toàn
+                    const romBlob = new Blob([event.target.result], { type: "application/octet-stream" });
+                    const romUrl = URL.createObjectURL(romBlob);
+
+                    // Thiết lập các biến cấu hình toàn cục cho EmulatorJS
+                    window.EJS_player = '#ejs-game';
+                    window.EJS_core = 'snes'; // Core snes9x
+                    window.EJS_gameUrl = romUrl;
+                    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+                    window.EJS_volume = 0.5;
+                    window.EJS_startOnLoaded = true;
+
+                    // Ẩn màn hình nạp ROM và hiển thị Emulator
+                    document.getElementById('screen-loading').style.display = 'none';
+                    document.getElementById('game-container').style.display = 'block';
+
+                    // Khởi tạo nạp loader.js từ EmulatorJS CDN
+                    const ejsLoader = document.createElement('script');
+                    ejsLoader.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+                    document.body.appendChild(ejsLoader);
+
+                    console.log("Đã tải ROM SNES thành công: " + file.name);
+                } catch (err) {
+                    const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                    alert(savedLang === 'vi' ? "Lỗi nạp tệp ROM SNES. Vui lòng thử lại!" : "Failed to load SNES ROM file. Please try again!");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Hỗ trợ Drag & Drop ROM vào màn hình
+        const screenZone = document.getElementById('screen-loading');
+        screenZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            screenZone.style.background = '#FFFDF2';
+            screenZone.style.borderColor = 'var(--accent-purple)';
+        });
+
+        screenZone.addEventListener('dragleave', () => {
+            screenZone.style.background = 'var(--bg-color)';
+            screenZone.style.borderColor = 'transparent';
+        });
+
+        screenZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            screenZone.style.background = 'var(--bg-color)';
+            screenZone.style.borderColor = 'transparent';
+            const file = e.dataTransfer.files[0];
+            if (file && (file.name.endsWith('.sfc') || file.name.endsWith('.smc'))) {
+                document.getElementById('snes-rom-file').files = e.dataTransfer.files;
+                const changeEvent = new Event('change');
+                document.getElementById('snes-rom-file').dispatchEvent(changeEvent);
+            } else {
+                const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                alert(savedLang === 'vi' ? "Vui lòng thả đúng tệp tin ROM định dạng .sfc hoặc .smc chuẩn!" : "Please drop a valid .sfc or .smc SNES ROM file!");
+            }
+        });
+
+        // LẮNG NGHE SỰ KIỆN PHÍM TẮT F6 VÀ F9 TRÊN DESKTOP CHO SNES
+        window.addEventListener("keydown", function(e) {
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            
+            // F6: Save State
+            if (e.code === "F6") {
+                e.preventDefault();
+                if (window.EJS_emulator && window.EJS_emulator.gameManager) {
+                    try {
+                        window.EJS_emulator.gameManager.saveState();
+                        showToast(savedLang === 'vi' ? "💾 ĐÃ LƯU TRẠNG THÁI!" : "💾 GAME STATE SAVED!", "success");
+                    } catch (err) {
+                        console.error("Save state call failed", err);
+                    }
+                } else {
+                    showToast(savedLang === 'vi' ? "⚠️ CHƯA NẠP GAME!" : "⚠️ GAME NOT LOADED!", "warning");
+                }
+            }
+
+            // F9: Load State
+            if (e.code === "F9") {
+                e.preventDefault();
+                if (window.EJS_emulator && window.EJS_emulator.gameManager) {
+                    try {
+                        window.EJS_emulator.gameManager.loadState();
+                        showToast(savedLang === 'vi' ? "⚡ ĐÃ NẠP TRẠNG THÁI!" : "⚡ GAME STATE LOADED!", "success");
+                    } catch (err) {
+                        console.error("Load state call failed", err);
+                    }
+                } else {
+                    showToast(savedLang === 'vi' ? "⚠️ CHƯA NẠP GAME!" : "⚠️ GAME NOT LOADED!", "warning");
+                }
+            }
+        });
+
+        // HỆ THỐNG DỊCH THUẬT ĐA NGÔN NGỮ ĐỒNG BỘ
+        function changeLang(lang) {
+            // Lưu lựa chọn ngôn ngữ
+            localStorage.setItem('selected_lang', lang);
+            
+            // Cập nhật trạng thái nút
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            if (lang === 'vi') {
+                document.getElementById('btn-lang-vi').classList.add('active');
+                document.documentElement.lang = 'vi';
+            } else {
+                document.getElementById('btn-lang-en').classList.add('active');
+                document.documentElement.lang = 'en';
+            }
+
+            // Dịch tất cả các thẻ có data-vi
+            document.querySelectorAll('[data-vi]').forEach(el => {
+                const text = lang === 'vi' ? el.getAttribute('data-vi') : el.getAttribute('data-en');
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = text;
+                } else {
+                    el.innerHTML = text;
+                }
+            });
+
+            // Tiêu đề SEO
+            if (lang === 'vi') {
+                document.title = "Trình Giả Lập SNES Online - Chơi Game Super Nintendo 16-Bit Cực Mượt";
+            } else {
+                document.title = "SNES Emulator Online - Play Super Nintendo 16-Bit Games";
+            }
+        }
+
+        // Tự động đồng bộ ngôn ngữ từ localStorage khi mở
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('selected_lang') || 'vi';
+            changeLang(savedLang);
+        });
+    </script>
+</body>
+</html>
