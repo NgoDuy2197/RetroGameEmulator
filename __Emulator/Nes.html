@@ -122,7 +122,12 @@
         .bar-btn {
             background: #333;
             color: #E6D5B8;
-            padding: 5px 6px;
+            padding: 0 6px;
+            height: 23px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
             border: 1.5px solid #E6D5B8;
             border-radius: 4px;
             font-size: 9px;
@@ -190,11 +195,11 @@
 
         .canvas-wrapper {
             position: relative;
-            aspect-ratio: 4 / 4;
+            aspect-ratio: 4 / 3;
             max-width: 100%;
             max-height: 100%;
-            width: auto;
-            height: auto;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -202,13 +207,42 @@
             overflow: hidden;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(0, 0, 0, 0.5);
             background-color: black;
+
+            /* Force WebKit browser hardware accelerated clipping */
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+        }
+
+        .canvas-wrapper.ar-4-4 {
+            aspect-ratio: 1 / 1 !important;
+            width: auto !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+        }
+
+        .canvas-wrapper.ar-full {
+            aspect-ratio: auto !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .canvas-wrapper.ar-full #nes-canvas {
+            border-radius: 0 !important;
+            scale: 1.07;
         }
 
         #nes-canvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 42px;
-            object-fit: contain;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 12px;
+            object-fit: fill !important;
             image-rendering: pixelated;
             transition: filter 0.2s;
         }
@@ -310,8 +344,8 @@
             bottom: 0;
             right: 0;
             background-image:
-                linear-gradient(90deg, rgba(0, 0, 0, 0.25) 1px, transparent 1px),
-                linear-gradient(180deg, rgba(0, 0, 0, 0.25) 1px, transparent 1px);
+                linear-gradient(140deg, rgba(0, 0, 0, 0.25) 1px, transparent 1px),
+                linear-gradient(180deg, #b6b6b640 1px, transparent 1px);
             background-size: 3px 3px;
             /* Beautiful micro-pixel grid mesh */
             z-index: 2;
@@ -1132,803 +1166,807 @@
 
 
             /* Retro TV Cabinet Wrapper (Desktop Override) */
-            @media (min-width: 1024px) {
+            .screen-area {
+                flex: 1;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                /* Cozy living room background: elegant striped wallpaper at top 60%, wood tabletop console at bottom 40% */
+                background:
+                    linear-gradient(to bottom,
+                        /* 1. Phần khoảng không sáng phía sau tivi (Tùy chọn nền) */
+                        #f4ebd9 0%, #f4ebd9 55%,
+                        /* 2. Mặt trên của kệ/tủ gỗ sáng (Màu gỗ sồi sáng) */
+                        #e8d3b4 55%, #dfc39e 57%,
+                        /* 3. Thân tủ gỗ sáng kèm các đường vân gỗ/độ bóng đổ */
+                        #d1b084 57%, #c6a172 100%);
+                background-image:
+                    /* Wallpaper stripes */
+                    linear-gradient(90deg, rgba(46, 58, 89, 0.03) 1px, transparent 1px),
+                    /* Room gradient */
+                    linear-gradient(to bottom,
+                        /* 1. Phần khoảng không sáng phía sau tivi (Tùy chọn nền) */
+                        #f4ebd9 0%, #f4ebd9 60%,
+                        /* 2. Mặt trên của kệ/tủ gỗ sáng (Màu gỗ sồi sáng) */
+                        #e8d3b4 70%, #dfc39e 90%,
+                        /* 3. Thân tủ gỗ sáng kèm các đường vân gỗ/độ bóng đổ */
+                        #d1b084 92%, #c6a172 100%);
+                background-size: 30px 100%, 100% 100%;
+                background-attachment: fixed;
+                justify-content: flex-start;
+                align-items: center;
+                padding: 8px 20px 8px 20px;
+                /* Adjusted to exactly 8px top padding for clear screen view */
+                box-sizing: border-box;
+                overflow-y: auto;
+                scroll-behavior: smooth;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(46, 58, 89, 0.3) transparent;
+            }
+
+            .screen-area::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .screen-area::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .screen-area::-webkit-scrollbar-thumb {
+                background: rgba(46, 58, 89, 0.3);
+                border-radius: 3px;
+            }
+
+            .screen-area::-webkit-scrollbar-thumb:hover {
+                background: var(--accent-red);
+            }
+
+            /* Floating controls bar */
+            .desktop-floating-controls {
+                position: absolute;
+                top: 15px;
+                left: 20px;
+                right: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                pointer-events: none;
+                z-index: 100;
+            }
+
+            .desktop-floating-controls .back-btn,
+            .desktop-floating-controls .lang-switch-container {
+                pointer-events: auto;
+            }
+
+            .desktop-floating-controls .lang-btn {
+                font-family: 'Fredoka', sans-serif;
+                font-weight: 800;
+                font-size: 11px;
+                padding: 5px 10px;
+                background: #FFFFFF;
+                border: 3px solid var(--border-color);
+                border-radius: 12px;
+                color: var(--text-main);
+                cursor: pointer;
+                box-shadow: 2px 2px 0px var(--border-color);
+                transition: all 0.1s ease;
+            }
+
+            .desktop-floating-controls .lang-btn.active {
+                background: var(--accent-blue);
+                color: #FFFFFF;
+            }
+
+            .desktop-floating-controls .lang-btn:hover {
+                background: var(--accent-yellow);
+                transform: translate(-1px, -1px);
+                box-shadow: 3px 3px 0px var(--border-color);
+            }
+
+            .desktop-floating-controls .lang-btn:active {
+                transform: translate(1px, 1px);
+                box-shadow: 1px 1px 0px var(--border-color);
+            }
+
+            /* Hanging picture frame ad slot above the TV */
+            .picture-frame-ad {
+                width: 100%;
+                max-width: var(--tv-max-width);
+                height: 80px;
+                border-radius: 4px;
+                padding: 4px;
+                position: relative;
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .picture-frame-ad .frame-inner {
+                width: 100%;
+                height: 100%;
+                background: #fcf8ee;
+                /* Cozy off-white artwork canvas */
+                /* Ornate gold inner trim */
+                padding: 4px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                box-sizing: border-box;
+                box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .picture-frame-ad .ad-label {
+                font-size: 8px;
+                color: var(--text-muted);
+                font-weight: 800;
+                margin-bottom: 2px;
+                letter-spacing: 1px;
+            }
+
+            .picture-frame-ad .ad-placeholder {
+                color: #5d4037;
+                font-family: 'Fredoka', sans-serif;
+                font-size: 10px;
+                font-weight: bold;
+                text-align: center;
+                border: 2px dashed #cbd5e1;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #ffffff;
+                border-radius: 6px;
+            }
+
+            .tv-cabinet {
+                flex: none;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                max-width: var(--tv-max-width);
+                /* Increased from 680px for larger TV display */
+                margin-top: 6px;
+                margin-bottom: 8px;
+                background: linear-gradient(135deg, #1f1f1f 0%, #0d0d0d 100%);
+                /* Matte black retro plastic cabinet */
+                border-radius: 15px;
+                box-shadow:
+                    0 12px 30px rgba(0, 0, 0, 0.7),
+                    0 24px 50px rgba(0, 0, 0, 0.5),
+                    inset 0 0 25px rgba(0, 0, 0, 0.9);
+                /* Thinner padding inside cabinet */
+                box-sizing: border-box;
+                position: relative;
+            }
+
+            /* Responsive auto-scaling for shorter viewports to guarantee top is never clipped */
+            @media (max-height: 750px) {
                 .screen-area {
-                    flex: 1;
-                    height: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    /* Cozy living room background: elegant striped wallpaper at top 60%, wood tabletop console at bottom 40% */
-                    background:
-                        linear-gradient(to bottom,
-                            /* 1. Phần khoảng không sáng phía sau tivi (Tùy chọn nền) */
-                            #f4ebd9 0%, #f4ebd9 55%,
-                            /* 2. Mặt trên của kệ/tủ gỗ sáng (Màu gỗ sồi sáng) */
-                            #e8d3b4 55%, #dfc39e 57%,
-                            /* 3. Thân tủ gỗ sáng kèm các đường vân gỗ/độ bóng đổ */
-                            #d1b084 57%, #c6a172 100%);
-                    background-image:
-                        /* Wallpaper stripes */
-                        linear-gradient(90deg, rgba(46, 58, 89, 0.03) 1px, transparent 1px),
-                        /* Room gradient */
-                        linear-gradient(to bottom,
-                            /* 1. Phần khoảng không sáng phía sau tivi (Tùy chọn nền) */
-                            #f4ebd9 0%, #f4ebd9 60%,
-                            /* 2. Mặt trên của kệ/tủ gỗ sáng (Màu gỗ sồi sáng) */
-                            #e8d3b4 70%, #dfc39e 90%,
-                            /* 3. Thân tủ gỗ sáng kèm các đường vân gỗ/độ bóng đổ */
-                            #d1b084 92%, #c6a172 100%);
-                    background-size: 30px 100%, 100% 100%;
-                    background-attachment: fixed;
-                    justify-content: flex-start;
-                    align-items: center;
-                    padding: 8px 20px 8px 20px;
-                    /* Adjusted to exactly 8px top padding for clear screen view */
-                    box-sizing: border-box;
-                    overflow-y: auto;
-                    scroll-behavior: smooth;
-                    scrollbar-width: thin;
-                    scrollbar-color: rgba(46, 58, 89, 0.3) transparent;
-                }
-
-                .screen-area::-webkit-scrollbar {
-                    width: 6px;
-                }
-
-                .screen-area::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-
-                .screen-area::-webkit-scrollbar-thumb {
-                    background: rgba(46, 58, 89, 0.3);
-                    border-radius: 3px;
-                }
-
-                .screen-area::-webkit-scrollbar-thumb:hover {
-                    background: var(--accent-red);
-                }
-
-                /* Floating controls bar */
-                .desktop-floating-controls {
-                    position: absolute;
-                    top: 15px;
-                    left: 20px;
-                    right: 20px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    pointer-events: none;
-                    z-index: 100;
-                }
-
-                .desktop-floating-controls .back-btn,
-                .desktop-floating-controls .lang-switch-container {
-                    pointer-events: auto;
-                }
-
-                .desktop-floating-controls .lang-btn {
-                    font-family: 'Fredoka', sans-serif;
-                    font-weight: 800;
-                    font-size: 11px;
-                    padding: 5px 10px;
-                    background: #FFFFFF;
-                    border: 3px solid var(--border-color);
-                    border-radius: 12px;
-                    color: var(--text-main);
-                    cursor: pointer;
-                    box-shadow: 2px 2px 0px var(--border-color);
-                    transition: all 0.1s ease;
-                }
-
-                .desktop-floating-controls .lang-btn.active {
-                    background: var(--accent-blue);
-                    color: #FFFFFF;
-                }
-
-                .desktop-floating-controls .lang-btn:hover {
-                    background: var(--accent-yellow);
-                    transform: translate(-1px, -1px);
-                    box-shadow: 3px 3px 0px var(--border-color);
-                }
-
-                .desktop-floating-controls .lang-btn:active {
-                    transform: translate(1px, 1px);
-                    box-shadow: 1px 1px 0px var(--border-color);
-                }
-
-                /* Hanging picture frame ad slot above the TV */
-                .picture-frame-ad {
-                    width: 100%;
-                    max-width: var(--tv-max-width);
-                    height: 80px;
-                    border-radius: 4px;
-                    padding: 4px;
-                    position: relative;
-                    box-sizing: border-box;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .picture-frame-ad .frame-inner {
-                    width: 100%;
-                    height: 100%;
-                    background: #fcf8ee;
-                    /* Cozy off-white artwork canvas */
-                    /* Ornate gold inner trim */
-                    padding: 4px;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-items: center;
-                    box-sizing: border-box;
-                    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.1);
-                }
-
-                .picture-frame-ad .ad-label {
-                    font-size: 8px;
-                    color: var(--text-muted);
-                    font-weight: 800;
-                    margin-bottom: 2px;
-                    letter-spacing: 1px;
-                }
-
-                .picture-frame-ad .ad-placeholder {
-                    color: #5d4037;
-                    font-family: 'Fredoka', sans-serif;
-                    font-size: 10px;
-                    font-weight: bold;
-                    text-align: center;
-                    border: 2px dashed #cbd5e1;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: #ffffff;
-                    border-radius: 6px;
+                    padding: 5px 15px 15px 15px;
                 }
 
                 .tv-cabinet {
-                    flex: none;
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-                    max-width: var(--tv-max-width);
-                    /* Increased from 680px for larger TV display */
-                    margin-top: 6px;
+                    margin-top: 5px;
                     margin-bottom: 8px;
-                    background: linear-gradient(135deg, #1f1f1f 0%, #0d0d0d 100%);
-                    /* Matte black retro plastic cabinet */
-                    border-radius: 15px;
-                    box-shadow:
-                        0 12px 30px rgba(0, 0, 0, 0.7),
-                        0 24px 50px rgba(0, 0, 0, 0.5),
-                        inset 0 0 25px rgba(0, 0, 0, 0.9);
-                    /* Thinner padding inside cabinet */
-                    box-sizing: border-box;
-                    position: relative;
                 }
 
-                /* Responsive auto-scaling for shorter viewports to guarantee top is never clipped */
-                @media (max-height: 750px) {
-                    .screen-area {
-                        padding: 5px 15px 15px 15px;
-                    }
-
-                    .tv-cabinet {
-                        margin-top: 5px;
-                        margin-bottom: 8px;
-                    }
-
-                    .picture-frame-ad {
-                        height: 90px;
-                    }
-
-                    .keyboard-legend-sticker {
-                        margin-top: 10px;
-                        padding: 10px 15px;
-                        gap: 15px;
-                        border-radius: 12px;
-                    }
-
-                    .keyboard-legend-sticker .sticker-title {
-                        font-size: 11px;
-                        margin-bottom: 2px;
-                        padding-bottom: 2px;
-                    }
-
-                    .keyboard-legend-sticker .sticker-row {
-                        font-size: 10.5px;
-                    }
-
-                    .keyboard-legend-sticker kbd {
-                        font-size: 8px;
-                        padding: 0.5px 3px;
-                    }
+                .picture-frame-ad {
+                    height: 90px;
                 }
 
-                @media (max-height: 650px) {
-                    .screen-area {
-                        padding: 5px 10px 10px 10px;
-                    }
-
-                    .tv-cabinet {
-                        margin-top: 4px;
-                        margin-bottom: 6px;
-                    }
-
-                    .picture-frame-ad {
-                        height: 80px;
-                    }
-
-                    .keyboard-legend-sticker {
-                        margin-top: 8px;
-                        padding: 8px 12px;
-                        gap: 10px;
-                        border-radius: 10px;
-                    }
-
-                    .keyboard-legend-sticker .sticker-title {
-                        font-size: 10px;
-                        margin-bottom: 1px;
-                        padding-bottom: 1px;
-                    }
-
-                    .keyboard-legend-sticker .sticker-row {
-                        font-size: 9.5px;
-                        gap: 4px;
-                    }
-
-                    .keyboard-legend-sticker kbd {
-                        font-size: 7.5px;
-                        padding: 0.5px 2px;
-                    }
-                }
-
-                .tv-cabinet::before {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 50%;
-                    background: linear-gradient(rgba(255, 255, 255, 0.04), transparent);
-                    border-radius: 27px 27px 0 0;
-                    pointer-events: none;
-                }
-
-                /* TV Bezel and Screen - Bulb/CRT shape */
-                .tv-screen-wrapper {
-                    background: #000000;
-                    /* border: 8px solid #141414; */
-                    /* Textured deep matte black bezel - thinned to 8px! */
-                    border-radius: 20px;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow:
-                        inset 0 0 25px rgba(0, 0, 0, 1),
-                        0 4px 10px rgba(0, 0, 0, 0.8);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 100%;
-                    aspect-ratio: 4 / 3;
-                    transform: perspective(800px) rotateX(1deg);
-                }
-
-                .canvas-wrapper {
-                    max-width: 100% !important;
-                    height: 100% !important;
-                    width: 100% !important;
-                    border: none !important;
-                    box-shadow: none !important;
-                    border-radius: 12px !important;
-                    background: #000 !important;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                    transition: background 0.3s ease;
-                }
-
-                #nes-canvas {
-                    width: 100% !important;
-                    height: 100% !important;
-                    object-fit: contain;
-                    border-radius: 16px;
-                }
-
-                /* Dark glass sheen on canvas wrapper when ROM not loaded (simulates real physically turned off TV screen) */
-                .rom-not-loaded .canvas-wrapper {
-                    background: radial-gradient(circle at 50% 30%, #1c1c1c 0%, #050505 100%) !important;
-                }
-
-                /* Flex Wrapper for deck and bottom ad to stretch and fit vertical volume panel */
-                .deck-and-ad-wrapper {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    gap: 15px;
-                    width: 100%;
-                    max-width: var(--deck-max-width);
-                    margin-top: 8px;
-                    margin-bottom: 8px;
-                    z-index: 10;
-                }
-
-                @media (max-height: 750px) {
-                    .deck-and-ad-wrapper {
-                        margin-top: 6px;
-                        margin-bottom: 6px;
-                        gap: 10px;
-                    }
-                }
-
-                @media (max-height: 650px) {
-                    .deck-and-ad-wrapper {
-                        margin-top: 4px;
-                        margin-bottom: 4px;
-                        gap: 8px;
-                    }
-                }
-
-                /* TV Controls deck sitting standalone below the screen */
-                .tv-controls-deck {
-                    background: #1e1e1e;
-                    /* Vintage dark charcoal console */
-                    border: 4px solid #121212;
-                    border-radius: 16px;
-                    padding: 8px 14px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 12px;
-                    flex: 2;
-                    height: 60px;
-                    margin: 0;
-                    box-shadow:
-                        0 8px 20px rgba(0, 0, 0, 0.6),
-                        inset 0 2px 4px rgba(255, 255, 255, 0.05);
-                    box-sizing: border-box;
-                    z-index: 10;
-                }
-
-                @media (max-height: 750px) {
-                    .tv-controls-deck {
-                        height: 52px;
-                        padding: 4px 10px;
-                        gap: 8px;
-                    }
-                }
-
-                @media (max-height: 650px) {
-                    .tv-controls-deck {
-                        height: 48px;
-                        padding: 4px 8px;
-                        gap: 6px;
-                    }
-                }
-
-                /* Bottom ad below the controls deck on the wooden tabletop */
-                .desktop-ad-bottom {
-                    flex: 1;
-                    max-width: 320px;
-                    height: 60px;
-                    background: rgba(15, 15, 15, 0.85);
-                    /* Premium dark-acrylic panel */
-                    border: 3px solid rgba(255, 255, 255, 0.08);
-                    border-radius: 12px;
-                    box-shadow:
-                        0 8px 16px rgba(0, 0, 0, 0.4),
-                        inset 0 0 10px rgba(0, 0, 0, 0.6);
-                    padding: 4px 6px;
-                    box-sizing: border-box;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 0;
-                    z-index: 10;
-                }
-
-                @media (max-height: 750px) {
-                    .desktop-ad-bottom {
-                        height: 52px;
-                    }
-                }
-
-                @media (max-height: 650px) {
-                    .desktop-ad-bottom {
-                        height: 48px;
-                    }
-                }
-
-                /* Responsive safeguards for smaller horizontal laptop resolutions (non-fullscreen) */
-                @media (min-width: 1024px) and (max-width: 1440px) {
-                    .desktop-ad-side {
-                        width: 180px !important;
-                        gap: 15px !important;
-                    }
-
-                    .square-picture-frame-ad {
-                        width: 165px !important;
-                        height: 165px !important;
-                    }
-
-                    .square-picture-frame-ad .ad-placeholder {
-                        font-size: 8px !important;
-                    }
-                }
-
-                @media (min-width: 1024px) and (max-width: 1300px) {
-                    .deck-btn {
-                        font-size: 9.5px !important;
-                        padding: 6px 8px !important;
-                    }
-
-                    .tv-controls-deck {
-                        padding: 8px 12px !important;
-                        gap: 8px !important;
-                    }
-                }
-
-                .desktop-ad-bottom .ad-label {
-                    font-size: 8px;
-                    color: #777;
-                    font-weight: 800;
-                    margin-bottom: 2px;
-                    letter-spacing: 1px;
-                }
-
-                .desktop-ad-bottom .ad-placeholder {
-                    color: #aaa;
-                    font-family: 'Fredoka', sans-serif;
-                    font-size: 11px;
-                    font-weight: bold;
-                    text-align: center;
-                    border: 2px dashed rgba(255, 255, 255, 0.15);
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: rgba(0, 0, 0, 0.4);
-                    border-radius: 6px;
-                }
-
-                /* Main system console buttons */
-                .deck-main-controls {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    flex: 1;
-                }
-
-                /* LED Power Light */
-                .power-led-group {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 3px;
-                    margin-right: 6px;
-                }
-
-                .power-led-light {
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    background: #EF4444;
-                    border: 2px solid var(--border-color);
-                    box-shadow: 0 0 5px #EF4444;
-                    transition: all 0.3s ease;
-                }
-
-                .rom-loaded .power-led-light {
-                    background: #10B981;
-                    box-shadow: 0 0 8px #10B981, 0 0 15px #10B981;
-                }
-
-                .power-led-label {
-                    font-family: 'Fredoka', sans-serif;
-                    font-weight: 800;
-                    font-size: 8px;
-                    color: #FFFFFF;
-                    letter-spacing: 0.5px;
-                }
-
-                /* TV buttons styled as mechanical brushed metal keys */
-                .deck-btn {
-                    font-family: 'Fredoka', sans-serif;
-                    font-weight: 800;
-                    font-size: 10px;
-                    padding: 5px 8px;
-                    /* 1. Đổi border thành màu đen bóng của tivi */
-                    border: 2px solid #1a1a1a;
-                    border-radius: 6px;
-                    cursor: pointer;
-
-                    /* 2. Gradient nhựa đen sâu (Dark Premium Acrylic) */
-                    background: linear-gradient(180deg, #3a3a3a 0%, #222222 40%, #181818 60%, #0a0a0a 100%);
-
-                    /* 3. Màu chữ phát sáng Neon (Ví dụ màu xanh Cyan cổ điển) */
-                    color: #10b981 !important;
-
-                    /* 4. Hiệu ứng đèn LED phát sáng cho chữ */
-                    text-shadow: 0 0 2px rgba(0, 255, 204, 0.6), 0 0 10px rgba(0, 255, 204, 0.4);
-
-                    /* 5. Đổ bóng khối nặng và viền sáng lọt lòng phía trên nút */
-                    box-shadow: 0 3px 0px #050505, inset 0 1px 1px rgba(255, 255, 255, 0.15);
-
-                    transition: all 0.1s ease;
-                    outline: none;
-                    text-transform: uppercase;
-                }
-
-                /* Hiệu ứng khi di chuột qua: Nút sáng rực lên */
-                .deck-btn:hover {
-                    color: #fff !important;
-                    text-shadow: 0 0 8px rgba(0, 255, 204, 0.9), 0 0 15px rgba(0, 255, 204, 0.6);
-                    box-shadow: 0 3px 0px #050505, 0 0 8px rgba(0, 255, 204, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
-                }
-
-                /* Hiệu ứng lún xuống chân thật khi bấm (Active) */
-                .deck-btn:active {
-                    transform: translateY(2px);
-                    box-shadow: 0 1px 0px #050505, inset 0 1px 2px rgba(0, 0, 0, 0.8);
-                }
-
-                .btn-rom-load,
-                .btn-reset,
-                .btn-save,
-                .btn-load {
-                    border-color: #2d2d2d;
-                }
-
-                /* Vintage channel knob style */
-                .channel-knob-wrapper {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 3px;
-                }
-
-                .channel-knob {
-                    width: 34px;
-                    height: 34px;
-                    border-radius: 50%;
-                    background: linear-gradient(135deg, #333, #151515);
-                    border: 3px solid #0a0a0a;
-                    position: relative;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.15);
-                    animation: rotateKnob 10s steps(8) infinite alternate;
-                }
-
-                .knob-indicator {
-                    width: 4px;
-                    height: 12px;
-                    background: #00E5FF;
-                    /* Retro cyan indicator color instead of red */
-                    position: absolute;
-                    top: 2px;
-                    left: 12px;
-                    border-radius: 2px;
-                }
-
-                .knob-label {
-                    font-size: 7px;
-                    font-weight: 900;
-                    color: #777;
-                    letter-spacing: 0.5px;
-                }
-
-                @keyframes rotateKnob {
-                    0% {
-                        transform: rotate(0deg);
-                    }
-
-                    100% {
-                        transform: rotate(270deg);
-                    }
-                }
-
-                /* Brushed metal blue steel glow for active speed and filter keys */
-                #btn-speed-desktop.active-speed,
-                #btn-filter-desktop.active-filter {
-                    background: linear-gradient(180deg, #bbdefb 0%, #90caf9 40%, #64b5f6 60%, #2196f3 100%) !important;
-                    color: #0b3c5d !important;
-                    border-color: #0b3c5d;
-                    box-shadow:
-                        0 3px 0px #0b3c5d,
-                        inset 0 1px 0px rgba(255, 255, 255, 0.4);
-                }
-
-                /* Horizontal Retro Volume Panel */
-                .horizontal-vol-panel {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 6px 12px;
-                    margin-left: 3px;
-                    background: #1e1e1e67;
-                    border: 4px solid #452a03;
-                    border-radius: 12px;
-                    box-shadow:
-                        0 8px 20px rgba(0, 0, 0, 0.6),
-                        inset 0 2px 4px rgba(255, 255, 255, 0.05);
-                    height: 60px;
-                    box-sizing: border-box;
-                    gap: 8px;
-                }
-
-                @media (max-height: 750px) {
-                    .horizontal-vol-panel {
-                        height: 52px;
-                        padding: 4px 10px;
-                    }
-                }
-
-                @media (max-height: 650px) {
-                    .horizontal-vol-panel {
-                        height: 48px;
-                        padding: 4px 8px;
-                    }
-                }
-
-                .vol-icon {
-                    font-size: 13px;
-                    color: #888;
-                }
-
-                .horizontal-slider-track {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    background: #0b0b0b;
-                    border: 2.5px solid #1a1a1a;
-                    border-radius: 8px;
-                    padding: 2px 8px;
-                    margin: 0;
-                    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
-                    height: 24px;
-                    width: 90px;
-                    box-sizing: border-box;
-                }
-
-                @media (max-height: 750px) {
-                    .horizontal-slider-track {
-                        width: 70px;
-                        height: 20px;
-                    }
-                }
-
-                @media (max-height: 650px) {
-                    .horizontal-slider-track {
-                        width: 60px;
-                        height: 18px;
-                    }
-                }
-
-                .horizontal-retro-slider {
-                    -webkit-appearance: none;
-                    appearance: none;
-                    width: 100%;
-                    height: 6px;
-                    background: #1a1a1a !important;
-                    border-radius: 3px;
-                    outline: none;
-                    margin: 0;
-                    padding: 0;
-                    border: none !important;
-                    cursor: pointer;
-                }
-
-                .horizontal-retro-slider::-webkit-slider-thumb {
-                    -webkit-appearance: none;
-                    width: 14px;
-                    height: 20px;
-                    border-radius: 2px;
-                    background: linear-gradient(to right,
-                            #4a3319 0%,
-                            #d4af37 20%,
-                            #aa8010 45%,
-                            #f3e5ab 60%,
-                            #997300 85%,
-                            #332600 100%);
-                    border: 2px solid #222222;
-                    cursor: pointer;
-                    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.7);
-                }
-
-                .horizontal-retro-slider::-moz-range-thumb {
-                    width: 14px;
-                    height: 20px;
-                    border-radius: 2px;
-                    background: linear-gradient(to right,
-                            #4a3319 0%,
-                            #d4af37 20%,
-                            #aa8010 45%,
-                            #f3e5ab 60%,
-                            #997300 85%,
-                            #332600 100%);
-                    border: 2px solid #222222;
-                    cursor: pointer;
-                    box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.7);
-                }
-
-                .vol-percentage {
-                    font-family: 'Courier New', Courier, monospace;
-                    font-weight: 900;
-                    font-size: 10px;
-                    color: #00f0ff;
-                    text-shadow: 0 0 4px rgba(0, 240, 255, 0.6);
-                    text-align: center;
-                    width: 28px;
-                }
-
-                /* Keyboard Decal sticker panel below the TV */
                 .keyboard-legend-sticker {
-                    display: flex;
-                    background: #FFFDF9;
-                    border: 3.5px dashed var(--border-color);
-                    border-radius: 20px;
-                    padding: 15px 20px;
-                    width: 100%;
-                    max-width: 700px;
-                    box-sizing: border-box;
-                    gap: 20px;
-                    margin-top: 18px;
-                    margin-bottom: 25px;
-                    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.05);
+                    margin-top: 10px;
+                    padding: 10px 15px;
+                    gap: 15px;
+                    border-radius: 12px;
                 }
 
-                .sticker-col {
-                    flex: 1;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 5px;
+                .keyboard-legend-sticker .sticker-title {
+                    font-size: 11px;
+                    margin-bottom: 2px;
+                    padding-bottom: 2px;
                 }
 
-                .sticker-title {
-                    font-family: 'Fredoka', sans-serif;
-                    font-weight: 800;
-                    font-size: 12px;
-                    color: var(--accent-red);
-                    letter-spacing: 0.5px;
-                    border-bottom: 2px dashed #E2E8F0;
-                    padding-bottom: 3px;
-                    margin-bottom: 4px;
-                    text-transform: uppercase;
+                .keyboard-legend-sticker .sticker-row {
+                    font-size: 10.5px;
                 }
 
-                .sticker-row {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    font-size: 11.5px;
-                    font-weight: 700;
-                    color: var(--text-main);
-                }
-
-                .sticker-row span {
-                    color: var(--text-muted);
-                }
-
-                kbd {
-                    background-color: #FFFFFF;
-                    border: 2px solid var(--border-color);
-                    border-radius: 6px;
-                    box-shadow: 0 1.5px 0 var(--border-color);
-                    color: var(--text-main);
-                    display: inline-block;
-                    font-family: inherit;
-                    font-size: 9px;
-                    font-weight: 800;
-                    padding: 1px 4px;
-                    margin-left: 2px;
+                .keyboard-legend-sticker kbd {
+                    font-size: 8px;
+                    padding: 0.5px 3px;
                 }
             }
+
+            @media (max-height: 650px) {
+                .screen-area {
+                    padding: 5px 10px 10px 10px;
+                }
+
+                .tv-cabinet {
+                    margin-top: 4px;
+                    margin-bottom: 6px;
+                }
+
+                .picture-frame-ad {
+                    height: 80px;
+                }
+
+                .keyboard-legend-sticker {
+                    margin-top: 8px;
+                    padding: 8px 12px;
+                    gap: 10px;
+                    border-radius: 10px;
+                }
+
+                .keyboard-legend-sticker .sticker-title {
+                    font-size: 10px;
+                    margin-bottom: 1px;
+                    padding-bottom: 1px;
+                }
+
+                .keyboard-legend-sticker .sticker-row {
+                    font-size: 9.5px;
+                    gap: 4px;
+                }
+
+                .keyboard-legend-sticker kbd {
+                    font-size: 7.5px;
+                    padding: 0.5px 2px;
+                }
+            }
+
+            .tv-cabinet::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 50%;
+                background: linear-gradient(rgba(255, 255, 255, 0.04), transparent);
+                border-radius: 27px 27px 0 0;
+                pointer-events: none;
+            }
+
+            /* TV Bezel and Screen - Bulb/CRT shape */
+            .tv-screen-wrapper {
+                background: #000000;
+                /* border: 8px solid #141414; */
+                /* Textured deep matte black bezel - thinned to 8px! */
+                border-radius: 12px;
+                position: relative;
+                overflow: hidden;
+                box-shadow:
+                    inset 0 0 25px rgba(0, 0, 0, 1),
+                    0 4px 10px rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                aspect-ratio: 4 / 3;
+                transform: perspective(800px) rotateX(1deg);
+            }
+
+            .canvas-wrapper {
+                max-width: 100% !important;
+                height: 100% !important;
+                width: 100% !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 12px !important;
+                background: #000 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                transition: background 0.3s ease;
+
+                /* Force WebKit browser hardware accelerated clipping */
+                -webkit-mask-image: -webkit-radial-gradient(white, black);
+                -webkit-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
+            }
+
+            #nes-canvas {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: fill;
+                border-radius: 12px;
+            }
+
+            /* Dark glass sheen on canvas wrapper when ROM not loaded (simulates real physically turned off TV screen) */
+            .rom-not-loaded .canvas-wrapper {
+                background: radial-gradient(circle at 50% 30%, #1c1c1c 0%, #050505 100%) !important;
+            }
+
+            /* Flex Wrapper for deck and bottom ad to stretch and fit vertical volume panel */
+            .deck-and-ad-wrapper {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 15px;
+                width: 100%;
+                max-width: var(--deck-max-width);
+                margin-top: 8px;
+                margin-bottom: 8px;
+                z-index: 10;
+            }
+
+            @media (max-height: 750px) {
+                .deck-and-ad-wrapper {
+                    margin-top: 6px;
+                    margin-bottom: 6px;
+                    gap: 10px;
+                }
+            }
+
+            @media (max-height: 650px) {
+                .deck-and-ad-wrapper {
+                    margin-top: 4px;
+                    margin-bottom: 4px;
+                    gap: 8px;
+                }
+            }
+
+            /* TV Controls deck sitting standalone below the screen */
+            .tv-controls-deck {
+                background: #1e1e1e;
+                /* Vintage dark charcoal console */
+                border: 4px solid #121212;
+                border-radius: 16px;
+                padding: 8px 14px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                flex: 2;
+                height: 60px;
+                margin: 0;
+                box-shadow:
+                    0 8px 20px rgba(0, 0, 0, 0.6),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.05);
+                box-sizing: border-box;
+                z-index: 10;
+            }
+
+            @media (max-height: 750px) {
+                .tv-controls-deck {
+                    height: 52px;
+                    padding: 4px 10px;
+                    gap: 8px;
+                }
+            }
+
+            @media (max-height: 650px) {
+                .tv-controls-deck {
+                    height: 48px;
+                    padding: 4px 8px;
+                    gap: 6px;
+                }
+            }
+
+            /* Bottom ad below the controls deck on the wooden tabletop */
+            .desktop-ad-bottom {
+                flex: 1;
+                max-width: 320px;
+                height: 60px;
+                background: rgba(15, 15, 15, 0.85);
+                /* Premium dark-acrylic panel */
+                border: 3px solid rgba(255, 255, 255, 0.08);
+                border-radius: 12px;
+                box-shadow:
+                    0 8px 16px rgba(0, 0, 0, 0.4),
+                    inset 0 0 10px rgba(0, 0, 0, 0.6);
+                padding: 4px 6px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                margin: 0;
+                z-index: 10;
+            }
+
+            @media (max-height: 750px) {
+                .desktop-ad-bottom {
+                    height: 52px;
+                }
+            }
+
+            @media (max-height: 650px) {
+                .desktop-ad-bottom {
+                    height: 48px;
+                }
+            }
+
+            /* Responsive safeguards for smaller horizontal laptop resolutions (non-fullscreen) */
+            @media (min-width: 1024px) and (max-width: 1440px) {
+                .desktop-ad-side {
+                    width: 180px !important;
+                    gap: 15px !important;
+                }
+
+                .square-picture-frame-ad {
+                    width: 165px !important;
+                    height: 165px !important;
+                }
+
+                .square-picture-frame-ad .ad-placeholder {
+                    font-size: 8px !important;
+                }
+            }
+
+            @media (min-width: 1024px) and (max-width: 1300px) {
+                .deck-btn {
+                    font-size: 9.5px !important;
+                    padding: 6px 8px !important;
+                }
+
+                .tv-controls-deck {
+                    padding: 8px 12px !important;
+                    gap: 8px !important;
+                }
+            }
+
+            .desktop-ad-bottom .ad-label {
+                font-size: 8px;
+                color: #777;
+                font-weight: 800;
+                margin-bottom: 2px;
+                letter-spacing: 1px;
+            }
+
+            .desktop-ad-bottom .ad-placeholder {
+                color: #aaa;
+                font-family: 'Fredoka', sans-serif;
+                font-size: 11px;
+                font-weight: bold;
+                text-align: center;
+                border: 2px dashed rgba(255, 255, 255, 0.15);
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 6px;
+            }
+
+            /* Main system console buttons */
+            .deck-main-controls {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+            }
+
+            /* LED Power Light */
+            .power-led-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 3px;
+                margin-right: 6px;
+            }
+
+            .power-led-light {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #EF4444;
+                border: 2px solid var(--border-color);
+                box-shadow: 0 0 5px #EF4444;
+                transition: all 0.3s ease;
+            }
+
+            .rom-loaded .power-led-light {
+                background: #10B981;
+                box-shadow: 0 0 8px #10B981, 0 0 15px #10B981;
+            }
+
+            .power-led-label {
+                font-family: 'Fredoka', sans-serif;
+                font-weight: 800;
+                font-size: 8px;
+                color: #FFFFFF;
+                letter-spacing: 0.5px;
+            }
+
+            /* TV buttons styled as mechanical brushed metal keys */
+            .deck-btn {
+                font-family: 'Fredoka', sans-serif;
+                font-weight: 800;
+                font-size: 10px;
+                padding: 5px 8px;
+                /* 1. Đổi border thành màu đen bóng của tivi */
+                border: 2px solid #1a1a1a;
+                border-radius: 6px;
+                cursor: pointer;
+
+                /* 2. Gradient nhựa đen sâu (Dark Premium Acrylic) */
+                background: linear-gradient(180deg, #3a3a3a 0%, #222222 40%, #181818 60%, #0a0a0a 100%);
+
+                /* 3. Màu chữ phát sáng Neon (Ví dụ màu xanh Cyan cổ điển) */
+                color: #10b981 !important;
+
+                /* 4. Hiệu ứng đèn LED phát sáng cho chữ */
+                text-shadow: 0 0 2px rgba(0, 255, 204, 0.6), 0 0 10px rgba(0, 255, 204, 0.4);
+
+                /* 5. Đổ bóng khối nặng và viền sáng lọt lòng phía trên nút */
+                box-shadow: 0 3px 0px #050505, inset 0 1px 1px rgba(255, 255, 255, 0.15);
+
+                transition: all 0.1s ease;
+                outline: none;
+                text-transform: uppercase;
+            }
+
+            /* Hiệu ứng khi di chuột qua: Nút sáng rực lên */
+            .deck-btn:hover {
+                color: #fff !important;
+                text-shadow: 0 0 8px rgba(0, 255, 204, 0.9), 0 0 15px rgba(0, 255, 204, 0.6);
+                box-shadow: 0 3px 0px #050505, 0 0 8px rgba(0, 255, 204, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            }
+
+            /* Hiệu ứng lún xuống chân thật khi bấm (Active) */
+            .deck-btn:active {
+                transform: translateY(2px);
+                box-shadow: 0 1px 0px #050505, inset 0 1px 2px rgba(0, 0, 0, 0.8);
+            }
+
+            .btn-rom-load,
+            .btn-reset,
+            .btn-save,
+            .btn-load {
+                border-color: #2d2d2d;
+            }
+
+            /* Vintage channel knob style */
+            .channel-knob-wrapper {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 3px;
+            }
+
+            .channel-knob {
+                width: 34px;
+                height: 34px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #333, #151515);
+                border: 3px solid #0a0a0a;
+                position: relative;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5), inset 0 2px 2px rgba(255, 255, 255, 0.15);
+                animation: rotateKnob 10s steps(8) infinite alternate;
+            }
+
+            .knob-indicator {
+                width: 4px;
+                height: 12px;
+                background: #00E5FF;
+                /* Retro cyan indicator color instead of red */
+                position: absolute;
+                top: 2px;
+                left: 12px;
+                border-radius: 2px;
+            }
+
+            .knob-label {
+                font-size: 7px;
+                font-weight: 900;
+                color: #777;
+                letter-spacing: 0.5px;
+            }
+
+            @keyframes rotateKnob {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(270deg);
+                }
+            }
+
+            /* Brushed metal blue steel glow for active speed and filter keys */
+            #btn-speed-desktop.active-speed,
+            #btn-filter-desktop.active-filter {
+                background: linear-gradient(180deg, #bbdefb 0%, #90caf9 40%, #64b5f6 60%, #2196f3 100%) !important;
+                color: #0b3c5d !important;
+                border-color: #0b3c5d;
+                box-shadow:
+                    0 3px 0px #0b3c5d,
+                    inset 0 1px 0px rgba(255, 255, 255, 0.4);
+            }
+
+            /* Horizontal Retro Volume Panel */
+            .horizontal-vol-panel {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 6px 12px;
+                margin-left: 3px;
+                background: #1e1e1e67;
+                border: 4px solid #452a03;
+                border-radius: 12px;
+                box-shadow:
+                    0 8px 20px rgba(0, 0, 0, 0.6),
+                    inset 0 2px 4px rgba(255, 255, 255, 0.05);
+                height: 60px;
+                box-sizing: border-box;
+                gap: 8px;
+            }
+
+            @media (max-height: 750px) {
+                .horizontal-vol-panel {
+                    height: 52px;
+                    padding: 4px 10px;
+                }
+            }
+
+            @media (max-height: 650px) {
+                .horizontal-vol-panel {
+                    height: 48px;
+                    padding: 4px 8px;
+                }
+            }
+
+            .vol-icon {
+                font-size: 13px;
+                color: #888;
+            }
+
+            .horizontal-slider-track {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #0b0b0b;
+                border: 2.5px solid #1a1a1a;
+                border-radius: 8px;
+                padding: 2px 8px;
+                margin: 0;
+                box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+                height: 24px;
+                width: 90px;
+                box-sizing: border-box;
+            }
+
+            @media (max-height: 750px) {
+                .horizontal-slider-track {
+                    width: 70px;
+                    height: 20px;
+                }
+            }
+
+            @media (max-height: 650px) {
+                .horizontal-slider-track {
+                    width: 60px;
+                    height: 18px;
+                }
+            }
+
+            .horizontal-retro-slider {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 100%;
+                height: 6px;
+                background: #1a1a1a !important;
+                border-radius: 3px;
+                outline: none;
+                margin: 0;
+                padding: 0;
+                border: none !important;
+                cursor: pointer;
+            }
+
+            .horizontal-retro-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 14px;
+                height: 20px;
+                border-radius: 2px;
+                background: linear-gradient(to right,
+                        #4a3319 0%,
+                        #d4af37 20%,
+                        #aa8010 45%,
+                        #f3e5ab 60%,
+                        #997300 85%,
+                        #332600 100%);
+                border: 2px solid #222222;
+                cursor: pointer;
+                box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.7);
+            }
+
+            .horizontal-retro-slider::-moz-range-thumb {
+                width: 14px;
+                height: 20px;
+                border-radius: 2px;
+                background: linear-gradient(to right,
+                        #4a3319 0%,
+                        #d4af37 20%,
+                        #aa8010 45%,
+                        #f3e5ab 60%,
+                        #997300 85%,
+                        #332600 100%);
+                border: 2px solid #222222;
+                cursor: pointer;
+                box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.7);
+            }
+
+            .vol-percentage {
+                font-family: 'Courier New', Courier, monospace;
+                font-weight: 900;
+                font-size: 10px;
+                color: #00f0ff;
+                text-shadow: 0 0 4px rgba(0, 240, 255, 0.6);
+                text-align: center;
+                width: 28px;
+            }
+
+            /* Keyboard Decal sticker panel below the TV */
+            .keyboard-legend-sticker {
+                display: flex;
+                background: #FFFDF9;
+                border: 3.5px dashed var(--border-color);
+                border-radius: 20px;
+                padding: 15px 20px;
+                width: 100%;
+                max-width: 700px;
+                box-sizing: border-box;
+                gap: 20px;
+                margin-top: 18px;
+                margin-bottom: 25px;
+                box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.05);
+            }
+
+            .sticker-col {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .sticker-title {
+                font-family: 'Fredoka', sans-serif;
+                font-weight: 800;
+                font-size: 12px;
+                color: var(--accent-red);
+                letter-spacing: 0.5px;
+                border-bottom: 2px dashed #E2E8F0;
+                padding-bottom: 3px;
+                margin-bottom: 4px;
+                text-transform: uppercase;
+            }
+
+            .sticker-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 11.5px;
+                font-weight: 700;
+                color: var(--text-main);
+            }
+
+            .sticker-row span {
+                color: var(--text-muted);
+            }
+
+            kbd {
+                background-color: #FFFFFF;
+                border: 2px solid var(--border-color);
+                border-radius: 6px;
+                box-shadow: 0 1.5px 0 var(--border-color);
+                color: var(--text-main);
+                display: inline-block;
+                font-family: inherit;
+                font-size: 9px;
+                font-weight: 800;
+                padding: 1px 4px;
+                margin-left: 2px;
+            }
+        }
     </style>
 </head>
 
@@ -1951,6 +1989,7 @@
                 <button class="bar-btn mobile-only" id="btn-full">FULL</button>
                 <button class="bar-btn mobile-only" id="btn-theme">THEME</button>
                 <button class="bar-btn mobile-only" id="btn-filter">FILTER</button>
+                <button class="bar-btn mobile-only" id="btn-aspect-mobile" title="Tỷ lệ màn hình">⛶</button>
 
                 <label for="rom-file" class="bar-btn file-input-label mobile-only" data-vi="NẠP ROM"
                     data-en="LOAD ROM">ROM</label>
@@ -2007,7 +2046,7 @@
                         <div id="virus-mascot" class="rom-mascot-emoji">😊</div>
 
                         <!-- Single Canvas wrapper shared by both mobile and desktop -->
-                        <div class="canvas-wrapper" id="canvas-filter-shell">
+                        <div class="canvas-wrapper ar-4-4" id="canvas-filter-shell">
                             <canvas id="nes-canvas" width="256" height="240"></canvas>
                         </div>
                     </div>
@@ -2035,7 +2074,8 @@
                                 LOAD</button>
                             <button class="deck-btn" id="btn-speed-desktop">SPEED x1</button>
                             <button class="deck-btn" id="btn-filter-desktop">NORMAL</button>
-                            <button class="deck-btn" id="btn-full-desktop" title="Toàn màn hình">⛶</button>
+                            <button class="deck-btn" id="btn-aspect-desktop" title="Tỷ lệ màn hình">⛶</button>
+                            <button class="deck-btn" id="btn-full-desktop" title="Toàn màn hình">⤢</button>
                         </div>
                     </div>
 
@@ -2556,18 +2596,29 @@
         const themeModes = ['famicom', 'vice', 'matcha', 'sakura', 'gameboy', 'neon', 'midnight'];
         let currentThemeIndex = 0;
 
-        document.getElementById('btn-theme').addEventListener('click', function () {
-            if (isMovingDpad) return;
-            gamepad.className = "gamepad";
+        function applyTheme(themeName) {
+            themeModes.forEach(mode => {
+                gamepad.classList.remove(`theme-${mode}`);
+            });
+            gamepad.classList.add(`theme-${themeName}`);
+            localStorage.setItem('selected_theme', themeName);
+        }
 
+        function cycleTheme() {
             currentThemeIndex = (currentThemeIndex + 1) % themeModes.length;
             const activeTheme = themeModes[currentThemeIndex];
+            applyTheme(activeTheme);
 
-            gamepad.classList.add(`theme-${activeTheme}`);
+            const btnTheme = document.getElementById('btn-theme');
+            if (btnTheme) {
+                btnTheme.innerText = activeTheme.toUpperCase();
+                setTimeout(() => btnTheme.innerText = "THEME", 800);
+            }
+        }
 
-            const originalText = this.innerText;
-            this.innerText = activeTheme.toUpperCase();
-            setTimeout(() => this.innerText = "THEME", 800);
+        document.getElementById('btn-theme').addEventListener('click', function () {
+            if (isMovingDpad) return;
+            cycleTheme();
         });
 
         // ==========================================
@@ -2577,37 +2628,128 @@
         const filterModes = ['normal', 'pixel', 'crt', 'warm', 'mono', 'cyber', 'gbgreen'];
         let currentFilterIndex = 0;
 
-        function cycleFilter() {
-            filterShell.className = "canvas-wrapper";
-            currentFilterIndex = (currentFilterIndex + 1) % filterModes.length;
-            const activeMode = filterModes[currentFilterIndex];
+        function applyFilter(filterName, showToastNotify = false) {
+            // Remove existing filter classes
+            filterModes.forEach(mode => {
+                if (mode !== 'normal') {
+                    filterShell.classList.remove(`filter-${mode}`);
+                }
+            });
 
-            if (activeMode !== 'normal') {
-                filterShell.classList.add(`filter-${activeMode}`);
+            if (filterName !== 'normal') {
+                filterShell.classList.add(`filter-${filterName}`);
             }
 
             const btnFilter = document.getElementById('btn-filter');
             const btnFilterDesktop = document.getElementById('btn-filter-desktop');
 
-            const text = activeMode.toUpperCase();
-            btnFilter.innerText = text;
+            const text = filterName.toUpperCase();
+            if (btnFilter) btnFilter.innerText = text;
             if (btnFilterDesktop) btnFilterDesktop.innerText = text;
 
-            btnFilter.style.background = activeMode === 'normal' ? "#333" : "#1e5323";
+            if (btnFilter) btnFilter.style.background = filterName === 'normal' ? "#333" : "#1e5323";
             if (btnFilterDesktop) {
-                btnFilterDesktop.style.background = activeMode === 'normal' ? "" : "var(--accent-green)";
-                btnFilterDesktop.style.color = activeMode === 'normal' ? "" : "#fff";
+                btnFilterDesktop.style.background = filterName === 'normal' ? "" : "var(--accent-green)";
+                btnFilterDesktop.style.color = filterName === 'normal' ? "" : "#fff";
             }
 
-            const savedLang = localStorage.getItem('selected_lang') || 'vi';
-            showToast((savedLang === 'vi' ? "📺 Bộ lọc: " : "📺 Filter: ") + text, "success");
+            localStorage.setItem('selected_filter', filterName);
+
+            if (showToastNotify) {
+                const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                showToast((savedLang === 'vi' ? "📺 Bộ lọc: " : "📺 Filter: ") + text, "success");
+            }
         }
+
+        function cycleFilter() {
+            currentFilterIndex = (currentFilterIndex + 1) % filterModes.length;
+            const activeMode = filterModes[currentFilterIndex];
+            applyFilter(activeMode, true);
+        }
+
         document.getElementById('btn-filter').addEventListener('click', function () {
             if (isMovingDpad) return;
             cycleFilter();
         });
         const btnFilterDesktop = document.getElementById('btn-filter-desktop');
         if (btnFilterDesktop) btnFilterDesktop.addEventListener('click', cycleFilter);
+
+        // ==========================================
+        // 7B. QUẢN LÝ TỶ LỆ MÀN HÌNH (ASPECT RATIO)
+        // ==========================================
+        const aspectRatios = ['4-4', 'full'];
+        let currentRatioIndex = 0; // Starts with 4-4 as default
+
+        function applyAspectRatio(ratioName, showToastNotify = false) {
+            const shell = document.getElementById('canvas-filter-shell');
+            if (!shell) return;
+
+            shell.classList.remove('ar-4-4', 'ar-full');
+            shell.classList.add(`ar-${ratioName}`);
+
+            localStorage.setItem('selected_aspect_ratio', ratioName);
+
+            if (showToastNotify) {
+                const savedLang = localStorage.getItem('selected_lang') || 'vi';
+                let label = ratioName === 'full'
+                    ? (savedLang === 'vi' ? 'Toàn bộ' : 'Full')
+                    : ratioName.replace('-', '/');
+
+                showToast((savedLang === 'vi' ? "⛶ Tỷ lệ màn hình: " : "⛶ Screen Ratio: ") + label, "success");
+            }
+        }
+
+        function cycleAspectRatio() {
+            currentRatioIndex = (currentRatioIndex + 1) % aspectRatios.length;
+            const activeRatio = aspectRatios[currentRatioIndex];
+            applyAspectRatio(activeRatio, true);
+        }
+
+        const btnAspectMobile = document.getElementById('btn-aspect-mobile');
+        if (btnAspectMobile) {
+            btnAspectMobile.addEventListener('click', function () {
+                if (isMovingDpad) return;
+                cycleAspectRatio();
+            });
+        }
+        const btnAspectDesktop = document.getElementById('btn-aspect-desktop');
+        if (btnAspectDesktop) {
+            btnAspectDesktop.addEventListener('click', cycleAspectRatio);
+        }
+
+        // ==========================================
+        // 7C. TỰ ĐỘNG KHÔI PHỤC CÁC TÙY CHỌN ĐÃ LƯU
+        // ==========================================
+        function loadSavedPreferences() {
+            // 1. Khôi phục giao diện (Theme)
+            const savedTheme = localStorage.getItem('selected_theme');
+            if (savedTheme && themeModes.includes(savedTheme)) {
+                currentThemeIndex = themeModes.indexOf(savedTheme);
+                applyTheme(savedTheme);
+            } else {
+                applyTheme('famicom');
+            }
+
+            // 2. Khôi phục bộ lọc (Filter)
+            const savedFilter = localStorage.getItem('selected_filter');
+            if (savedFilter && filterModes.includes(savedFilter)) {
+                currentFilterIndex = filterModes.indexOf(savedFilter);
+                applyFilter(savedFilter, false);
+            } else {
+                applyFilter('normal', false);
+            }
+
+            // 3. Khôi phục tỷ lệ màn hình (Aspect Ratio)
+            const savedRatio = localStorage.getItem('selected_aspect_ratio');
+            if (savedRatio && aspectRatios.includes(savedRatio)) {
+                currentRatioIndex = aspectRatios.indexOf(savedRatio);
+                applyAspectRatio(savedRatio, false);
+            } else {
+                applyAspectRatio('4-4', false);
+            }
+        }
+        // Gọi khôi phục ngay khi khởi động
+        loadSavedPreferences();
 
         // ==========================================
         // 8. LOGIC SAVE / LOAD & TỰ ĐỘNG LƯU TRẠNG THÁI
@@ -2782,7 +2924,7 @@
                     document.webkitExitFullscreen();
                 }
                 btnFull.innerText = "FULL";
-                if (btnFullDesktop) btnFullDesktop.innerHTML = "⛶";
+                if (btnFullDesktop) btnFullDesktop.innerHTML = "⤢";
             }
         }
         document.getElementById('btn-full').addEventListener('click', function () {
@@ -2801,7 +2943,7 @@
                 if (btnFullDesktop) btnFullDesktop.innerHTML = "🗗";
             } else {
                 btnFull.innerText = "FULL";
-                if (btnFullDesktop) btnFullDesktop.innerHTML = "⛶";
+                if (btnFullDesktop) btnFullDesktop.innerHTML = "⤢";
             }
         });
 
