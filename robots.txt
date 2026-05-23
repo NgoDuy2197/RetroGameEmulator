@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # Sitemap URL (Replace with your actual Vercel domain once deployed)
-Sitemap: https://retro-game-emulator-portal.vercel.app/sitemap.xml
+Sitemap: https://retro-game-emulator.vercel.app/sitemap.xml
