@@ -115,14 +115,15 @@
 
         .sys-controls {
             display: flex;
-            gap: 4px;
+            gap: 3px;
             align-items: center;
+            min-width: 0;
         }
 
         .bar-btn {
             background: #333;
             color: #E6D5B8;
-            padding: 0 6px;
+            padding: 0 5px;
             height: 23px;
             display: inline-flex;
             align-items: center;
@@ -130,11 +131,20 @@
             vertical-align: middle;
             border: 1.5px solid #E6D5B8;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 8.5px;
             cursor: pointer;
             font-weight: bold;
             box-shadow: 1px 1px 0px #000;
             text-transform: uppercase;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Nút biểu tượng vuông cho gọn thanh công cụ */
+        .bar-btn.icon-btn {
+            width: 26px;
+            padding: 0;
+            font-size: 13px;
         }
 
         .bar-btn:active {
@@ -261,24 +271,33 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 15px;
-            gap: 10px;
+            padding: 0 10px;
+            gap: 8px;
             z-index: 8;
+        }
+
+        /* Nút SAVE đứng riêng ngoài cùng bên trái, âm lượng căn giữa thanh */
+        .dash-btn-lead {
+            flex-shrink: 0;
         }
 
         .dash-vol-group {
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 5px;
             color: #aaa;
             font-size: 11px;
             font-weight: bold;
+            min-width: 0;
+            flex: 1;
         }
 
         .volume-slider {
             -webkit-appearance: none;
             appearance: none;
-            width: 65px;
+            width: 58px;
+            min-width: 34px;
             height: 5px;
             background: #444;
             border-radius: 3px;
@@ -296,19 +315,29 @@
 
         .dash-btn-group {
             display: flex;
-            gap: 5px;
+            gap: 4px;
+            flex-shrink: 0;
         }
 
         .dash-btn {
             background: #2a2a2a;
             color: #ccc;
             border: 1px solid #555;
-            padding: 4px 8px;
+            padding: 5px 7px;
             border-radius: 3px;
             font-size: 9px;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        /* Nút tua nhanh: giữ để x4, nhả ra về x1 */
+        #btn-speed {
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .dash-btn:active {
@@ -611,7 +640,7 @@
         .dpad-center {
             position: absolute;
             left: 80px;
-            bottom: 125px;
+            bottom: 150px;
             width: 130px;
             height: 130px;
             transform: translate(-50%, 50%);
@@ -660,20 +689,152 @@
             pointer-events: none;
         }
 
-        .dpad-cross.active-up::after {
+        .dpad-cross:not(.round).active-up::after {
             background: linear-gradient(to bottom, #555 50%, #222 50%) !important;
         }
 
-        .dpad-cross.active-down::after {
+        .dpad-cross:not(.round).active-down::after {
             background: linear-gradient(to top, #555 50%, #222 50%) !important;
         }
 
-        .dpad-cross.active-left::before {
+        .dpad-cross:not(.round).active-left::before {
             background: linear-gradient(to right, #555 50%, #222 50%) !important;
         }
 
-        .dpad-cross.active-right::before {
+        .dpad-cross:not(.round).active-right::before {
             background: linear-gradient(to left, #555 50%, #222 50%) !important;
+        }
+
+        /* --------------------------------------------- */
+        /* DPAD DẠNG VÒNG TRÒN (ROUND MODE)               */
+        /* --------------------------------------------- */
+        /* Hai lớp ::before/::after được kéo trùng nhau thành 1 đĩa tròn
+           để vẫn thừa hưởng đúng màu nền của từng theme tay cầm. */
+        .dpad-cross.round::before,
+        .dpad-cross.round::after {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .dpad-cross.round::after {
+            box-shadow: inset 0 -6px 12px rgba(0, 0, 0, 0.35),
+                inset 0 5px 10px rgba(255, 255, 255, 0.12);
+        }
+
+        .dpad-seg {
+            display: none;
+        }
+
+        .dpad-cross.round .dpad-seg {
+            display: flex;
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            clip-path: polygon(50% 50%, 10% 2%, 90% 2%);
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 9px;
+            font-size: 12px;
+            line-height: 1;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.45);
+            z-index: 1;
+            pointer-events: none;
+            transition: background 0.1s, color 0.1s;
+        }
+
+        .dpad-cross.round .seg-up {
+            transform: rotate(0deg);
+        }
+
+        .dpad-cross.round .seg-right {
+            transform: rotate(90deg);
+        }
+
+        .dpad-cross.round .seg-down {
+            transform: rotate(180deg);
+        }
+
+        .dpad-cross.round .seg-left {
+            transform: rotate(270deg);
+        }
+
+        .dpad-cross.round.active-up .seg-up,
+        .dpad-cross.round.active-down .seg-down,
+        .dpad-cross.round.active-left .seg-left,
+        .dpad-cross.round.active-right .seg-right {
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        /* Trục xoay ở giữa được phóng to một chút cho đúng dáng cần tròn */
+        .dpad-center.is-round .dpad-core {
+            top: 43px;
+            left: 43px;
+            width: 44px;
+            height: 44px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6),
+                0 0 0 3px rgba(0, 0, 0, 0.18);
+        }
+
+        /* --------------------------------------------- */
+        /* NÚT A&B (BẤM ĐỒNG THỜI 2 NÚT)                  */
+        /* --------------------------------------------- */
+        .ab-wrapper {
+            position: absolute;
+            left: 50%;
+            top: -26px;
+            transform: translate(-50%, -50%) rotate(28deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Nút A+B dạng âm dương: nền chia đôi, hai thuỳ tròn mang chữ A và B */
+        .action-btn.ab-btn {
+            width: 52px;
+            height: 52px;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to right, #EDE3D3 50%, #1c1c1c 50%) !important;
+            border: 2.5px solid #111 !important;
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.45), 2px 4px 6px rgba(0, 0, 0, 0.35) !important;
+        }
+
+        .ab-lobe {
+            position: absolute;
+            left: 25%;
+            width: 50%;
+            height: 50%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .ab-lobe-a {
+            top: 0;
+            background: #1c1c1c;
+            color: #EDE3D3;
+        }
+
+        .ab-lobe-b {
+            top: 50%;
+            background: #EDE3D3;
+            color: #1c1c1c;
+        }
+
+        .action-btn.ab-btn.active {
+            transform: translateY(2px) scale(0.94);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55),
+                0 0 12px rgba(255, 255, 255, 0.4) !important;
         }
 
         /* CỤM NÚT HỆ THỐNG SELECT / START */
@@ -717,7 +878,7 @@
         .action-group {
             position: absolute;
             right: 75px;
-            bottom: 125px;
+            bottom: 150px;
             width: 150px;
             height: 80px;
             transform: translate(50%, 50%) rotate(-28deg);
@@ -756,6 +917,146 @@
             font-size: 10px;
             color: #222;
             font-weight: bold;
+        }
+
+        /* ============================================= */
+        /* CHẾ ĐỘ CẤU HÌNH VỊ TRÍ NÚT BẤM                */
+        /* ============================================= */
+        .gamepad.editing {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .gamepad.editing .dpad-center,
+        .gamepad.editing .action-group,
+        .gamepad.editing .center-btns {
+            outline: 2px dashed rgba(255, 0, 85, 0.75);
+            outline-offset: 6px;
+            border-radius: 10px;
+            animation: editPulse 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes editPulse {
+            from {
+                outline-color: rgba(255, 0, 85, 0.35);
+            }
+
+            to {
+                outline-color: rgba(255, 0, 85, 0.95);
+            }
+        }
+
+        .gamepad.editing .dragging {
+            opacity: 0.75;
+            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+        }
+
+        .config-overlay {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 52px;
+            z-index: 60;
+            display: none;
+            justify-content: center;
+            pointer-events: none;
+            padding: 0 10px;
+        }
+
+        .config-overlay.open {
+            display: flex;
+        }
+
+        .config-box {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 340px;
+            background: #1b1b1b;
+            border: 2px solid #E6D5B8;
+            border-radius: 10px;
+            box-shadow: 3px 3px 0 #000;
+            padding: 12px;
+            color: #E6D5B8;
+            font-size: 11px;
+        }
+
+        .config-title {
+            font-weight: bold;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .config-hint {
+            color: #9c9384;
+            line-height: 1.45;
+            margin-bottom: 10px;
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .config-seg {
+            display: flex;
+            gap: 4px;
+        }
+
+        .config-opt {
+            background: #333;
+            color: #E6D5B8;
+            border: 1.5px solid #55504a;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .config-opt.active {
+            background: #8A1C14;
+            border-color: #E6D5B8;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 6px;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+        }
+
+        .config-actions button {
+            flex: 1;
+            background: #333;
+            color: #E6D5B8;
+            border: 1.5px solid #E6D5B8;
+            border-radius: 4px;
+            padding: 7px 4px;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 1px 1px 0 #000;
+        }
+
+        .config-actions button:active {
+            transform: translate(1px, 1px);
+            box-shadow: none;
+        }
+
+        #btn-config-save {
+            background: #1e5323;
+        }
+
+        #btn-config-reset {
+            background: #6b4a12;
         }
 
         /* TỐI ƯU LANDSCAPE */
@@ -812,12 +1113,12 @@
 
             .dpad-center {
                 left: 95px;
-                bottom: 53%;
+                bottom: 58%;
             }
 
             .action-group {
                 right: 90px;
-                bottom: 53%;
+                bottom: 58%;
             }
 
             .center-btns {
@@ -855,23 +1156,30 @@
         /* TOAST NOTIFICATION */
         .toast {
             position: fixed;
-            top: 20px;
+            top: 14px;
             left: 50%;
             transform: translateX(-50%) translateY(-100px);
             background: #FFFFFF;
-            border: 3px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px 24px;
-            font-weight: 800;
-            font-size: 14.5px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 18px;
+            font-weight: 700;
+            font-size: 11.5px;
+            letter-spacing: 0.2px;
+            width: max-content;
+            max-width: calc(100vw - 24px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             z-index: 99999;
-            box-shadow: 4px 4px 0px var(--border-color);
+            box-shadow: 2px 2px 0px var(--border-color);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
             opacity: 0;
             pointer-events: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 6px;
             font-family: 'Fredoka', sans-serif;
             color: var(--text-main);
         }
@@ -1991,14 +2299,49 @@
                     <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
                 </div>
 
-                <button class="bar-btn mobile-only" id="btn-full">FULL</button>
+                <button class="bar-btn icon-btn mobile-only" id="btn-config" title="Cấu hình nút bấm">⚙</button>
                 <button class="bar-btn mobile-only" id="btn-theme">THEME</button>
                 <button class="bar-btn mobile-only" id="btn-filter">FILTER</button>
-                <button class="bar-btn mobile-only" id="btn-aspect-mobile" title="Tỷ lệ màn hình">⛶</button>
+                <button class="bar-btn icon-btn mobile-only" id="btn-aspect-mobile" title="Tỷ lệ màn hình">⛶</button>
 
+                <button class="bar-btn icon-btn mobile-only" id="btn-full" title="Toàn màn hình">⤢</button>
                 <label for="rom-file" class="bar-btn file-input-label mobile-only" data-vi="NẠP ROM"
                     data-en="LOAD ROM">ROM</label>
                 <input type="file" id="rom-file" accept=".nes">
+            </div>
+        </div>
+
+        <!-- BẢNG CẤU HÌNH VỊ TRÍ NÚT BẤM (MOBILE) -->
+        <div class="config-overlay" id="config-overlay">
+            <div class="config-box">
+                <div class="config-title" data-vi="⚙ TÙY CHỈNH TAY CẦM" data-en="⚙ GAMEPAD LAYOUT">⚙ TÙY CHỈNH TAY CẦM
+                </div>
+                <div class="config-hint" data-vi="Kéo cụm D-PAD, cụm A/B hoặc SELECT/START tới vị trí bạn muốn, rồi bấm LƯU. Trong lúc cấu hình, các nút không điều khiển game."
+                    data-en="Drag the D-PAD, the A/B cluster or SELECT/START to where you want, then press SAVE. Buttons do not control the game while configuring.">
+                    Kéo cụm D-PAD, cụm A/B hoặc SELECT/START tới vị trí bạn muốn, rồi bấm LƯU. Trong lúc cấu hình, các
+                    nút không điều khiển game.
+                </div>
+                <div class="config-row">
+                    <span data-vi="KIỂU D-PAD" data-en="D-PAD STYLE">KIỂU D-PAD</span>
+                    <div class="config-seg">
+                        <button class="config-opt" data-dpad="round" data-vi="VÒNG TRÒN"
+                            data-en="ROUND">VÒNG TRÒN</button>
+                        <button class="config-opt" data-dpad="cross" data-vi="CHỮ THẬP" data-en="CROSS">CHỮ THẬP</button>
+                    </div>
+                </div>
+                <div class="config-row">
+                    <span data-vi="GIỮ = BẮN LIÊN THANH" data-en="HOLD = AUTO-FIRE">GIỮ = BẮN LIÊN THANH</span>
+                    <div class="config-seg">
+                        <button class="config-opt" data-turbo="ab">A+B</button>
+                        <button class="config-opt" data-turbo="b">B</button>
+                        <button class="config-opt" data-turbo="off" data-vi="TẮT" data-en="OFF">TẮT</button>
+                    </div>
+                </div>
+                <div class="config-actions">
+                    <button id="btn-config-reset" data-vi="↺ MẶC ĐỊNH" data-en="↺ DEFAULT">↺ MẶC ĐỊNH</button>
+                    <button id="btn-config-save" data-vi="💾 LƯU" data-en="💾 SAVE">💾 LƯU</button>
+                    <button id="btn-config-close" data-vi="✕ ĐÓNG" data-en="✕ CLOSE">✕ ĐÓNG</button>
+                </div>
             </div>
         </div>
 
@@ -2107,15 +2450,15 @@
                 </div>
 
                 <div class="sub-dashboard mobile-only">
+                    <button class="dash-btn dash-btn-lead" id="btn-save">💾 SAVE</button>
                     <div class="dash-vol-group">
                         <span>🔊</span>
                         <input type="range" class="volume-slider" id="vol-control" min="0" max="100" value="80">
                     </div>
                     <div class="dash-btn-group">
+                        <button class="dash-btn" id="btn-load">⚡ LOAD</button>
                         <button class="dash-btn" id="btn-reset-mobile" data-vi="RESET" data-en="RESET">RESET</button>
-                        <button class="dash-btn" id="btn-speed">SPEED x1</button>
-                        <button class="dash-btn" id="btn-save">SAVE STATE</button>
-                        <button class="dash-btn" id="btn-load">LOAD STATE</button>
+                        <button class="dash-btn" id="btn-speed" title="Bấm: đổi x1/x2/x4 — Giữ: tua nhanh x4, nhả tay về x1">⏩ x1</button>
                     </div>
                 </div>
 
@@ -2189,7 +2532,12 @@
         <div class="gamepad theme-famicom mobile-only" id="virtual-gamepad">
             <div class="dpad-center" id="dpad-anchor">
                 <div class="dpad-core"></div>
-                <div class="dpad-cross" id="dpad-graphics"></div>
+                <div class="dpad-cross" id="dpad-graphics">
+                    <span class="dpad-seg seg-up">▲</span>
+                    <span class="dpad-seg seg-right">▲</span>
+                    <span class="dpad-seg seg-down">▲</span>
+                    <span class="dpad-seg seg-left">▲</span>
+                </div>
             </div>
 
             <div class="center-btns">
@@ -2204,6 +2552,12 @@
             </div>
 
             <div class="action-group">
+                <div class="ab-wrapper" id="wrapper-AB">
+                    <div class="action-btn ab-btn" id="btn-AB">
+                        <span class="ab-lobe ab-lobe-a">A</span>
+                        <span class="ab-lobe ab-lobe-b">B</span>
+                    </div>
+                </div>
                 <div class="btn-wrapper" id="wrapper-B">
                     <div class="action-btn" id="btn-B">B</div>
                     <div class="action-label"></div>
@@ -2336,19 +2690,35 @@
         const btnB = document.getElementById('btn-B');
         const btnSelect = document.getElementById('btn-SELECT');
         const btnStart = document.getElementById('btn-START');
+        const btnAB = document.getElementById('btn-AB');
 
         let currentPressed = new Set();
         let turboInterval = null;
         let isMovingDpad = false;
+        let isEditingLayout = false;
+
+        // Nút nào nằm trong danh sách này thì GIỮ = bắn liên thanh (turbo / auto-fire).
+        // Đổi được trong bảng cấu hình vì vài game cần GIỮ A (nhảy cao) chứ không phải nhấp liên tục.
+        const TURBO_MODES = {
+            ab: ['A', 'B'],
+            b: ['B'],
+            off: []
+        };
+        let turboButtons = TURBO_MODES.ab;
+
+        function isTurbo(btn) {
+            return turboButtons.indexOf(btn) !== -1;
+        }
 
         function startTurbo() {
             if (turboInterval) return;
             let state = false;
             turboInterval = setInterval(() => {
-                if (currentPressed.has('B')) {
-                    state = !state;
-                    if (state) nes.buttonDown(1, BUTTON_MAP.B);
-                    else nes.buttonUp(1, BUTTON_MAP.B);
+                state = !state;
+                for (const btn of turboButtons) {
+                    if (!currentPressed.has(btn)) continue;
+                    if (state) nes.buttonDown(1, BUTTON_MAP[btn]);
+                    else nes.buttonUp(1, BUTTON_MAP[btn]);
                 }
             }, 50);
         }
@@ -2361,21 +2731,27 @@
         function updateButtons(newPressed) {
             for (let btn of currentPressed) {
                 if (!newPressed.has(btn)) {
-                    if (btn !== 'B') nes.buttonUp(1, BUTTON_MAP[btn]);
+                    if (!isTurbo(btn)) nes.buttonUp(1, BUTTON_MAP[btn]);
                     setVisualState(btn, false);
                 }
             }
             for (let btn of newPressed) {
                 if (!currentPressed.has(btn)) {
-                    if (btn !== 'B') nes.buttonDown(1, BUTTON_MAP[btn]);
+                    if (!isTurbo(btn)) nes.buttonDown(1, BUTTON_MAP[btn]);
                     setVisualState(btn, true);
                 }
             }
 
-            if (newPressed.has('B') && !currentPressed.has('B')) startTurbo();
-            if (!newPressed.has('B') && currentPressed.has('B')) {
-                stopTurbo();
-                nes.buttonUp(1, BUTTON_MAP.B);
+            const hadTurbo = turboButtons.some(b => currentPressed.has(b));
+            const hasTurbo = turboButtons.some(b => newPressed.has(b));
+            if (hasTurbo && !hadTurbo) startTurbo();
+            if (!hasTurbo && hadTurbo) stopTurbo();
+
+            // Nhả nút turbo nào thì phải thả hẳn nút đó, tránh kẹt phím giữa nhịp bật/tắt
+            for (const btn of turboButtons) {
+                if (currentPressed.has(btn) && !newPressed.has(btn)) {
+                    nes.buttonUp(1, BUTTON_MAP[btn]);
+                }
             }
 
             currentPressed = newPressed;
@@ -2388,9 +2764,16 @@
                 const el = document.getElementById(`btn-${btn}`);
                 if (el) el.classList.toggle('active', isActive);
             }
+            // Nút A+B sáng khi và chỉ khi cả hai nút cùng được giữ
+            if (btnAB && (btn === 'A' || btn === 'B')) {
+                const bothDown = document.getElementById('btn-A').classList.contains('active')
+                    && document.getElementById('btn-B').classList.contains('active');
+                btnAB.classList.toggle('active', bothDown);
+            }
         }
 
         function processTouchData(e) {
+            if (isEditingLayout) return;
             const nextPressed = new Set();
             const padRect = gamepad.getBoundingClientRect();
             const midX = padRect.left + padRect.width / 2;
@@ -2415,6 +2798,13 @@
             const cStaX = rStart.left + rStart.width / 2;
             const cStaY = rStart.top + rStart.height / 2;
 
+            let cABX = null, cABY = null;
+            if (btnAB) {
+                const rectAB = btnAB.getBoundingClientRect();
+                cABX = rectAB.left + rectAB.width / 2;
+                cABY = rectAB.top + rectAB.height / 2;
+            }
+
             let dpadTouchDetected = false;
 
             for (let i = 0; i < e.touches.length; i++) {
@@ -2427,6 +2817,16 @@
 
                 if (distSelect < 42) { nextPressed.add('SELECT'); continue; }
                 if (distStart < 42) { nextPressed.add('START'); continue; }
+
+                // Nút A+B: một chạm nhưng gửi đồng thời cả hai nút
+                if (cABX !== null) {
+                    const distAB = Math.sqrt((tx - cABX) ** 2 + (ty - cABY) ** 2);
+                    if (distAB < 30) {
+                        nextPressed.add('A');
+                        nextPressed.add('B');
+                        continue;
+                    }
+                }
 
                 if (tx < midX) {
                     const dx = tx - dpadCenterX;
@@ -2457,10 +2857,32 @@
             updateButtons(nextPressed);
         }
 
-        gamepad.addEventListener('touchstart', (e) => { e.preventDefault(); initAudio(); processTouchData(e); }, { passive: false });
-        gamepad.addEventListener('touchmove', (e) => { e.preventDefault(); processTouchData(e); }, { passive: false });
-        gamepad.addEventListener('touchend', (e) => { e.preventDefault(); processTouchData(e); }, { passive: false });
-        gamepad.addEventListener('touchcancel', (e) => { e.preventDefault(); processTouchData(e); }, { passive: false });
+        gamepad.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (isEditingLayout) { startLayoutDrag(e); return; }
+            initAudio();
+            processTouchData(e);
+        }, { passive: false });
+        gamepad.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (isEditingLayout) { moveLayoutDrag(e); return; }
+            processTouchData(e);
+        }, { passive: false });
+        gamepad.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            if (isEditingLayout) { endLayoutDrag(); return; }
+            processTouchData(e);
+        }, { passive: false });
+        gamepad.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            if (isEditingLayout) { endLayoutDrag(); return; }
+            processTouchData(e);
+        }, { passive: false });
+
+        // Hỗ trợ kéo bằng chuột khi mở DevTools / chơi trên máy có cảm ứng lai
+        gamepad.addEventListener('mousedown', (e) => { if (isEditingLayout) startLayoutDrag(e); });
+        gamepad.addEventListener('mousemove', (e) => { if (isEditingLayout) moveLayoutDrag(e); });
+        window.addEventListener('mouseup', () => { if (isEditingLayout) endLayoutDrag(); });
         canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
         document.getElementById('screen-box').addEventListener('touchstart', () => { initAudio(); });
 
@@ -2550,33 +2972,40 @@
         if (muteIconDesktop) muteIconDesktop.addEventListener('click', toggleMute);
 
         // ==========================================
-        // 5. QUẢN LÝ TUA NHANH (LOẠI BỎ x8 -> CHỈ CÒN x1 -> x2 -> x4)
+        // 5. QUẢN LÝ TUA NHANH
+        //    - BẤM NHANH : đổi vòng x1 -> x2 -> x4 -> x1 (giữ nguyên tốc độ đã chọn)
+        //    - GIỮ TỊT   : tua nhanh x4 tạm thời, NHẢ TAY là về x1
         // ==========================================
-        function toggleSpeed() {
-            if (speedMultiplier === 1) speedMultiplier = 2;
-            else if (speedMultiplier === 2) speedMultiplier = 4;
-            else speedMultiplier = 1;
+        const TURBO_SPEED = 4;
+        const SPEED_HOLD_MS = 250;   // giữ quá mốc này thì tính là "giữ", không phải "bấm"
+
+        function applySpeed(multiplier) {
+            if (speedMultiplier === multiplier) return;
+            speedMultiplier = multiplier;
 
             const btnSpeed = document.getElementById('btn-speed');
             const btnSpeedDesktop = document.getElementById('btn-speed-desktop');
 
-            const text = `SPEED x${speedMultiplier}`;
-            btnSpeed.innerText = text;
-            if (btnSpeedDesktop) btnSpeedDesktop.innerText = text;
+            if (btnSpeed) btnSpeed.innerText = `⏩ x${speedMultiplier}`;
+            if (btnSpeedDesktop) btnSpeedDesktop.innerText = `SPEED x${speedMultiplier}`;
 
             if (speedMultiplier === 1) {
-                btnSpeed.style.background = "#2a2a2a";
-                btnSpeed.style.color = "#ccc";
-                btnSpeed.style.borderColor = "#555";
+                if (btnSpeed) {
+                    btnSpeed.style.background = "#2a2a2a";
+                    btnSpeed.style.color = "#ccc";
+                    btnSpeed.style.borderColor = "#555";
+                }
                 if (btnSpeedDesktop) {
                     btnSpeedDesktop.style.background = "";
                     btnSpeedDesktop.style.color = "";
                     btnSpeedDesktop.style.borderColor = "";
                 }
             } else {
-                btnSpeed.style.background = "#8A1C14";
-                btnSpeed.style.color = "#fff";
-                btnSpeed.style.borderColor = "#ff0055";
+                if (btnSpeed) {
+                    btnSpeed.style.background = "#8A1C14";
+                    btnSpeed.style.color = "#fff";
+                    btnSpeed.style.borderColor = "#ff0055";
+                }
                 if (btnSpeedDesktop) {
                     btnSpeedDesktop.style.background = "var(--accent-red)";
                     btnSpeedDesktop.style.color = "#fff";
@@ -2585,15 +3014,66 @@
             }
 
             audioBufferQueue = [];
-            const savedLang = localStorage.getItem('selected_lang') || 'vi';
-            showToast((savedLang === 'vi' ? "⚡ Tốc độ: x" : "⚡ Speed: x") + speedMultiplier, "success");
         }
-        document.getElementById('btn-speed').addEventListener('click', function () {
-            if (isMovingDpad) return;
-            toggleSpeed();
-        });
-        const btnSpeedDesktop = document.getElementById('btn-speed-desktop');
-        if (btnSpeedDesktop) btnSpeedDesktop.addEventListener('click', toggleSpeed);
+
+        function cycleSpeed() {
+            const next = speedMultiplier === 1 ? 2 : (speedMultiplier === 2 ? 4 : 1);
+            applySpeed(next);
+            const lang = localStorage.getItem('selected_lang') || 'vi';
+            showToast((lang === 'vi' ? "⚡ Tốc độ: x" : "⚡ Speed: x") + next, "success");
+        }
+
+        let speedHoldTimer = null;
+        let isHoldingSpeed = false;
+
+        function releaseSpeedHold() {
+            clearTimeout(speedHoldTimer);
+            speedHoldTimer = null;
+            if (isHoldingSpeed) {
+                isHoldingSpeed = false;
+                applySpeed(1);      // nhả tay sau khi giữ -> về tốc độ thường
+                return true;
+            }
+            return false;
+        }
+
+        // Gắn hành vi "bấm để đổi tốc độ / giữ để tua nhanh tạm thời" (mobile + desktop).
+        function bindSpeedButton(btn) {
+            if (!btn) return;
+            btn.style.touchAction = 'none';
+            btn.style.userSelect = 'none';
+
+            btn.addEventListener('pointerdown', (e) => {
+                if (e.button !== undefined && e.button !== 0) return;
+                if (isMovingDpad || isEditingLayout) return;
+                e.preventDefault();
+                isHoldingSpeed = false;
+                clearTimeout(speedHoldTimer);
+                speedHoldTimer = setTimeout(() => {
+                    isHoldingSpeed = true;
+                    applySpeed(TURBO_SPEED);
+                }, SPEED_HOLD_MS);
+            });
+
+            btn.addEventListener('pointerup', (e) => {
+                if (e.button !== undefined && e.button !== 0) return;
+                // Giữ lâu -> chỉ thả tua nhanh. Bấm nhanh -> đổi vòng tốc độ.
+                if (!releaseSpeedHold()) cycleSpeed();
+            });
+
+            // Trượt tay ra ngoài nút: hủy, không tính là một lần bấm
+            btn.addEventListener('pointercancel', releaseSpeedHold);
+            btn.addEventListener('pointerleave', releaseSpeedHold);
+            // Chặn menu giữ-lâu trên mobile làm rớt sự kiện nhả tay
+            btn.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+
+        bindSpeedButton(document.getElementById('btn-speed'));
+        bindSpeedButton(document.getElementById('btn-speed-desktop'));
+
+        // Nhả tay ngoài vùng nút hoặc rời tab: chỉ hủy phần "giữ", không đụng tốc độ đã chọn
+        window.addEventListener('pointerup', releaseSpeedHold);
+        window.addEventListener('blur', releaseSpeedHold);
 
         // ==========================================
         // 6. QUẢN LÝ ĐỔI THEME TAY CẦM
@@ -2755,6 +3235,240 @@
         }
         // Gọi khôi phục ngay khi khởi động
         loadSavedPreferences();
+
+        // ==========================================
+        // 7D. CẤU HÌNH VỊ TRÍ NÚT BẤM & KIỂU D-PAD
+        // ==========================================
+        const LAYOUT_KEY = 'gamepad_layout_v1';
+        const DPAD_STYLE_KEY = 'gamepad_dpad_style';
+        const TURBO_MODE_KEY = 'gamepad_turbo_mode';
+        const DEFAULT_DPAD_STYLE = 'round';
+        const DEFAULT_TURBO_MODE = 'ab';
+
+        const dpadAnchor = document.getElementById('dpad-anchor');
+        const actionGroup = document.querySelector('.action-group');
+        const sysGroup = document.querySelector('.center-btns');
+        const configOverlay = document.getElementById('config-overlay');
+
+        // Mỗi cụm giữ nguyên transform gốc của nó (cụm A/B có xoay 28 độ)
+        const DRAGGABLES = [
+            { id: 'dpad', el: dpadAnchor, transform: 'translate(-50%, -50%)' },
+            { id: 'action', el: actionGroup, transform: 'translate(-50%, -50%) rotate(-28deg)' },
+            { id: 'sys', el: sysGroup, transform: 'translate(-50%, -50%)' }
+        ].filter(item => item.el);
+
+        let dragItem = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        function applyLayoutPos(item, fx, fy) {
+            item.el.style.left = (fx * 100).toFixed(2) + '%';
+            item.el.style.top = (fy * 100).toFixed(2) + '%';
+            item.el.style.right = 'auto';
+            item.el.style.bottom = 'auto';
+            item.el.style.transform = item.transform;
+        }
+
+        function clearLayoutPos(item) {
+            item.el.style.left = '';
+            item.el.style.top = '';
+            item.el.style.right = '';
+            item.el.style.bottom = '';
+            item.el.style.transform = '';
+        }
+
+        // Vị trí tâm của cụm nút, quy về tỉ lệ theo kích thước tay cầm
+        // để không bị lệch khi xoay ngang màn hình hay đổi thiết bị.
+        function currentFraction(el) {
+            const g = gamepad.getBoundingClientRect();
+            const r = el.getBoundingClientRect();
+            return {
+                x: ((r.left + r.width / 2) - g.left) / g.width,
+                y: ((r.top + r.height / 2) - g.top) / g.height
+            };
+        }
+
+        function loadLayout() {
+            let data = null;
+            try {
+                data = JSON.parse(localStorage.getItem(LAYOUT_KEY) || 'null');
+            } catch (err) {
+                data = null;
+            }
+            DRAGGABLES.forEach(item => {
+                const pos = data && data[item.id];
+                if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
+                    applyLayoutPos(item, pos.x, pos.y);
+                } else {
+                    clearLayoutPos(item);
+                }
+            });
+        }
+
+        function saveLayout() {
+            localStorage.setItem(DPAD_STYLE_KEY, dpadGfx.classList.contains('round') ? 'round' : 'cross');
+            const activeTurbo = document.querySelector('.config-opt[data-turbo].active');
+            localStorage.setItem(TURBO_MODE_KEY, activeTurbo ? activeTurbo.dataset.turbo : DEFAULT_TURBO_MODE);
+
+            const g = gamepad.getBoundingClientRect();
+            // Tay cầm đang bị thu gọn (ví dụ đang ẩn) thì toạ độ đo được vô nghĩa
+            if (g.width < 50 || g.height < 50) return;
+
+            const data = {};
+            DRAGGABLES.forEach(item => { data[item.id] = currentFraction(item.el); });
+            localStorage.setItem(LAYOUT_KEY, JSON.stringify(data));
+        }
+
+        function resetLayout() {
+            localStorage.removeItem(LAYOUT_KEY);
+            localStorage.removeItem(DPAD_STYLE_KEY);
+            localStorage.removeItem(TURBO_MODE_KEY);
+            DRAGGABLES.forEach(clearLayoutPos);
+            applyDpadStyle(DEFAULT_DPAD_STYLE);
+            applyTurboMode(DEFAULT_TURBO_MODE);
+        }
+
+        function applyDpadStyle(style) {
+            const isRound = style === 'round';
+            dpadGfx.classList.toggle('round', isRound);
+            if (dpadAnchor) dpadAnchor.classList.toggle('is-round', isRound);
+            document.querySelectorAll('.config-opt[data-dpad]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.dpad === (isRound ? 'round' : 'cross'));
+            });
+        }
+
+        function applyTurboMode(mode) {
+            const key = TURBO_MODES[mode] ? mode : DEFAULT_TURBO_MODE;
+            // Nhả hết nút đang giữ trước khi đổi chế độ, tránh kẹt phím ở nút vừa rời turbo
+            updateButtons(new Set());
+            stopTurbo();
+            turboButtons = TURBO_MODES[key];
+            document.querySelectorAll('.config-opt[data-turbo]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.turbo === key);
+            });
+            return key;
+        }
+
+        function pointFromEvent(e) {
+            if (e.touches && e.touches.length) {
+                return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+            if (e.changedTouches && e.changedTouches.length) {
+                return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            }
+            return { x: e.clientX, y: e.clientY };
+        }
+
+        function startLayoutDrag(e) {
+            const p = pointFromEvent(e);
+            let picked = null;
+            let pickedDist = Infinity;
+
+            DRAGGABLES.forEach(item => {
+                const r = item.el.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                const inside = p.x >= r.left - 12 && p.x <= r.right + 12
+                    && p.y >= r.top - 12 && p.y <= r.bottom + 12;
+                const dist = Math.sqrt((p.x - cx) ** 2 + (p.y - cy) ** 2);
+                if (inside && dist < pickedDist) { picked = item; pickedDist = dist; }
+            });
+
+            if (!picked) return;
+
+            const r = picked.el.getBoundingClientRect();
+            dragOffsetX = (r.left + r.width / 2) - p.x;
+            dragOffsetY = (r.top + r.height / 2) - p.y;
+            dragItem = picked;
+            picked.el.classList.add('dragging');
+        }
+
+        function moveLayoutDrag(e) {
+            if (!dragItem) return;
+            const p = pointFromEvent(e);
+            const g = gamepad.getBoundingClientRect();
+            const r = dragItem.el.getBoundingClientRect();
+
+            let cx = p.x + dragOffsetX - g.left;
+            let cy = p.y + dragOffsetY - g.top;
+
+            // Cho phép nhô ra rìa một chút nhưng không để cụm nút chạy mất khỏi tay cầm
+            const marginX = r.width * 0.3;
+            const marginY = r.height * 0.3;
+            cx = Math.min(Math.max(cx, marginX), g.width - marginX);
+            cy = Math.min(Math.max(cy, marginY), g.height - marginY);
+
+            applyLayoutPos(dragItem, cx / g.width, cy / g.height);
+        }
+
+        function endLayoutDrag() {
+            if (dragItem) dragItem.el.classList.remove('dragging');
+            dragItem = null;
+        }
+
+        function setConfigMode(open) {
+            isEditingLayout = open;
+            if (configOverlay) configOverlay.classList.toggle('open', open);
+            gamepad.classList.toggle('editing', open);
+            if (open) {
+                // Nhả toàn bộ nút đang giữ để game không bị kẹt phím khi chỉnh
+                updateButtons(new Set());
+                applySpeed(1);
+            } else {
+                endLayoutDrag();
+            }
+        }
+
+        // Khôi phục bố cục, kiểu D-pad & chế độ turbo đã lưu
+        applyDpadStyle(localStorage.getItem(DPAD_STYLE_KEY) || DEFAULT_DPAD_STYLE);
+        applyTurboMode(localStorage.getItem(TURBO_MODE_KEY) || DEFAULT_TURBO_MODE);
+        loadLayout();
+
+        const btnConfig = document.getElementById('btn-config');
+        if (btnConfig) {
+            btnConfig.addEventListener('click', function () {
+                if (isMovingDpad) return;
+                setConfigMode(!isEditingLayout);
+            });
+        }
+
+        document.querySelectorAll('.config-opt[data-dpad]').forEach(btn => {
+            btn.addEventListener('click', () => applyDpadStyle(btn.dataset.dpad));
+        });
+
+        document.querySelectorAll('.config-opt[data-turbo]').forEach(btn => {
+            btn.addEventListener('click', () => applyTurboMode(btn.dataset.turbo));
+        });
+
+        const btnConfigSave = document.getElementById('btn-config-save');
+        if (btnConfigSave) {
+            btnConfigSave.addEventListener('click', function () {
+                saveLayout();
+                setConfigMode(false);
+                const lang = localStorage.getItem('selected_lang') || 'vi';
+                showToast(lang === 'vi' ? "💾 Đã lưu bố cục tay cầm!" : "💾 Gamepad layout saved!", "success");
+            });
+        }
+
+        const btnConfigReset = document.getElementById('btn-config-reset');
+        if (btnConfigReset) {
+            btnConfigReset.addEventListener('click', function () {
+                resetLayout();
+                const lang = localStorage.getItem('selected_lang') || 'vi';
+                showToast(lang === 'vi' ? "↺ Đã trả về bố cục mặc định!" : "↺ Default layout restored!", "warning");
+            });
+        }
+
+        const btnConfigClose = document.getElementById('btn-config-close');
+        if (btnConfigClose) {
+            btnConfigClose.addEventListener('click', function () {
+                // Đóng mà không lưu: trả lại đúng bố cục đang được lưu trong máy
+                applyDpadStyle(localStorage.getItem(DPAD_STYLE_KEY) || DEFAULT_DPAD_STYLE);
+                applyTurboMode(localStorage.getItem(TURBO_MODE_KEY) || DEFAULT_TURBO_MODE);
+                loadLayout();
+                setConfigMode(false);
+            });
+        }
 
         // ==========================================
         // 8. LOGIC SAVE / LOAD & TỰ ĐỘNG LƯU TRẠNG THÁI
@@ -2965,7 +3679,7 @@
                 } else if (document.documentElement.webkitRequestFullscreen) {
                     document.documentElement.webkitRequestFullscreen();
                 }
-                btnFull.innerText = "EXIT";
+                btnFull.innerHTML = "🗗";
                 if (btnFullDesktop) btnFullDesktop.innerHTML = "🗗";
             } else {
                 if (document.exitFullscreen) {
@@ -2973,7 +3687,7 @@
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
                 }
-                btnFull.innerText = "FULL";
+                btnFull.innerHTML = "⤢";
                 if (btnFullDesktop) btnFullDesktop.innerHTML = "⤢";
             }
         }
@@ -2989,10 +3703,10 @@
             const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
 
             if (isFull) {
-                btnFull.innerText = "EXIT";
+                if (btnFull) btnFull.innerHTML = "🗗";
                 if (btnFullDesktop) btnFullDesktop.innerHTML = "🗗";
             } else {
-                btnFull.innerText = "FULL";
+                if (btnFull) btnFull.innerHTML = "⤢";
                 if (btnFullDesktop) btnFullDesktop.innerHTML = "⤢";
             }
         });
