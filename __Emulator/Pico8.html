@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description"
+        content="Chơi cartridge PICO-8 ngay trên trình duyệt: nạp bản xuất HTML (.html + .js hoặc .zip) của cart, tự động giải nén và chạy. Hỗ trợ bàn phím máy tính và cụm nút ảo D-Pad + O/X trên điện thoại.">
+    <meta name="keywords" content="pico-8 online, pico8 web player, choi pico 8, fantasy console, pico8 cart html">
+    <title>Chơi PICO-8 Online - Trình Chạy Cartridge Fantasy Console</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300..700&family=Lexend:wght@300..800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/player.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="../extends.js"></script>
+
+    <style>
+        /* ---- Khu vực chạy cart PICO-8 ---- */
+        .pico-stage {
+            flex: 1;
+            min-height: 0;
+            display: none;
+            flex-direction: column;
+            background: #000;
+            position: relative;
+        }
+
+        body.playing .pico-stage {
+            display: flex;
+        }
+
+        .pico-frame-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            background: #000;
+        }
+
+        #pico-frame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+            background: #000;
+        }
+
+        /* ---- Cụm nút ảo ---- */
+        .pico-pad {
+            display: none;
+            flex-shrink: 0;
+            height: 205px;
+            background: #14161d;
+            border-top: 3px solid #2b2f3d;
+            position: relative;
+            touch-action: none;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        body.playing.show-pad .pico-pad {
+            display: block;
+        }
+
+        .pico-dpad {
+            position: absolute;
+            left: 20px;
+            bottom: 18px;
+            width: 132px;
+            height: 132px;
+        }
+
+        .pico-key {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2b3040;
+            border: 2px solid #454c63;
+            border-radius: 10px;
+            color: #e7e9f2;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            box-shadow: 0 3px 0 #11131a;
+            user-select: none;
+        }
+
+        .pico-key.active {
+            background: #b176f0;
+            border-color: #fff;
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .pico-dpad .pico-key {
+            width: 44px;
+            height: 44px;
+        }
+
+        .pico-dpad .k-up {
+            left: 44px;
+            top: 0;
+        }
+
+        .pico-dpad .k-down {
+            left: 44px;
+            top: 88px;
+        }
+
+        .pico-dpad .k-left {
+            left: 0;
+            top: 44px;
+        }
+
+        .pico-dpad .k-right {
+            left: 88px;
+            top: 44px;
+        }
+
+        .pico-actions {
+            position: absolute;
+            right: 20px;
+            bottom: 24px;
+            width: 140px;
+            height: 110px;
+        }
+
+        .pico-actions .pico-key {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            font-size: 20px;
+        }
+
+        .pico-actions .k-o {
+            left: 0;
+            top: 44px;
+            background: #3b4b6b;
+        }
+
+        .pico-actions .k-x {
+            right: 0;
+            top: 0;
+            background: #6b3b58;
+        }
+
+        /* MENU / ESC nằm ở mép trên của khu nút để không đè lên nút O/X */
+        .pico-extra {
+            position: absolute;
+            left: 50%;
+            top: 10px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+
+        .pico-extra .pico-key {
+            position: relative;
+            padding: 8px 14px;
+            font-size: 11px;
+            border-radius: 20px;
+        }
+
+        /* Điện thoại nằm ngang: nút ảo đè lên hai bên màn hình cho đỡ chật */
+        @media (max-width: 1023px) and (orientation: landscape) {
+            body.playing.show-pad .pico-pad {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 150px;
+                background: transparent;
+                border-top: none;
+                pointer-events: none;
+                z-index: 50;
+            }
+
+            .pico-dpad,
+            .pico-actions,
+            .pico-extra {
+                pointer-events: auto;
+            }
+
+            .pico-dpad {
+                bottom: 8px;
+                left: 12px;
+            }
+
+            .pico-actions {
+                bottom: 12px;
+                right: 12px;
+            }
+
+            .pico-extra {
+                top: auto;
+                bottom: 8px;
+            }
+
+            .pico-key {
+                opacity: 0.82;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .pico-pad {
+                height: 170px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="toast-notice" class="toast">🍓</div>
+    <a href="../index.html" class="floating-exit" title="Trang chủ">←</a>
+
+    <div class="container">
+        <!-- THANH CÔNG CỤ -->
+        <div class="top-bar">
+            <div class="logo-wrapper">
+                <a href="../index.html" class="back-btn" title="Trang chủ">←</a>
+                <div class="logo" data-vi="🍓 PICO-8" data-en="🍓 PICO-8">🍓 PICO-8</div>
+            </div>
+
+            <div class="sys-controls">
+                <div class="lang-switch-container">
+                    <button class="lang-btn active" id="btn-lang-vi" onclick="changeLang('vi')">VI</button>
+                    <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
+                </div>
+
+                <button class="bar-btn" id="btn-toggle-pad" data-vi="NÚT ẢO" data-en="TOUCH PAD">NÚT ẢO</button>
+
+                <label for="rom-file" class="bar-btn file-input-label" id="btn-load-label" data-vi="NẠP CART"
+                    data-en="LOAD CART">NẠP CART</label>
+                <input type="file" id="rom-file" accept=".html,.htm,.js,.zip,.p8,.png" multiple>
+            </div>
+        </div>
+
+        <!-- QUẢNG CÁO (ĐIỆN THOẠI) -->
+        <div id="adsense-top-zone">
+            <div class="ads-placeholder" data-vi="[ KHU VỰC QUẢNG CÁO ]" data-en="[ ADVERTISEMENT ZONE ]">[ KHU VỰC
+                QUẢNG CÁO ]</div>
+        </div>
+
+        <div class="main-layout">
+            <div class="screen-area">
+                <!-- MÀN HÌNH CHỜ -->
+                <div class="screen-container" id="screen-loading">
+                    <div class="welcome-box">
+                        <div class="welcome-mascot" onclick="document.getElementById('rom-file').click();">🍓</div>
+                        <h2 class="welcome-title" data-vi="PICO-8 Online" data-en="PICO-8 Online">PICO-8 Online</h2>
+                        <p class="welcome-desc"
+                            data-vi="Nạp <b>bản xuất HTML</b> của cart PICO-8: chọn tệp <b>.zip</b> (tự giải nén) hoặc chọn cùng lúc cả hai tệp <b>.html + .js</b>. Trò chơi chạy ngay trên trang này, kèm cụm nút ảo cho điện thoại."
+                            data-en="Load a PICO-8 <b>HTML export</b>: pick the <b>.zip</b> (auto-extracted) or select both the <b>.html + .js</b> files together. The cart runs right here, with on-screen buttons for phones.">
+                            Nạp bản xuất HTML của cart PICO-8.</p>
+
+                        <div class="chip-row">
+                            <span class="chip">.ZIP → tự giải nén</span>
+                            <span class="chip blue">.HTML + .JS</span>
+                            <span class="chip green">D-Pad + O/X ảo</span>
+                        </div>
+
+                        <div class="terminal-disclaimer">
+                            <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
+                                data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
+                                data-vi="Trang này chạy bản xuất HTML do chính PICO-8 tạo ra (menu <i>Export &gt; cart.html</i>) hoặc bản xuất tải từ BBS. Tệp cart thô <b>.p8 / .p8.png</b> không chạy trực tiếp được vì cần lõi PICO-8 bản quyền của Lexaloffle — hãy dùng PICO-8 (hoặc Education Edition) để xuất ra HTML trước."
+                                data-en="This page runs the HTML export produced by PICO-8 itself (<i>Export &gt; cart.html</i>) or downloaded from the BBS. Raw <b>.p8 / .p8.png</b> carts cannot run here because they need Lexaloffle's licensed PICO-8 runtime — export them to HTML from PICO-8 (or the Education Edition) first.">Trang
+                                này chạy bản xuất HTML do chính PICO-8 tạo ra.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SÂN KHẤU PICO-8 -->
+                <div class="pico-stage" id="pico-stage">
+                    <div class="pico-frame-wrap">
+                        <iframe id="pico-frame" title="PICO-8 cart" allow="autoplay; fullscreen; gamepad"></iframe>
+                    </div>
+
+                    <!-- CỤM NÚT ẢO -->
+                    <div class="pico-pad" id="pico-pad">
+                        <div class="pico-dpad">
+                            <div class="pico-key k-up" data-key="ArrowUp">▲</div>
+                            <div class="pico-key k-left" data-key="ArrowLeft">◀</div>
+                            <div class="pico-key k-right" data-key="ArrowRight">▶</div>
+                            <div class="pico-key k-down" data-key="ArrowDown">▼</div>
+                        </div>
+                        <div class="pico-actions">
+                            <div class="pico-key k-o" data-key="KeyZ">O</div>
+                            <div class="pico-key k-x" data-key="KeyX">X</div>
+                        </div>
+                        <div class="pico-extra">
+                            <div class="pico-key" data-key="Enter">MENU</div>
+                            <div class="pico-key" data-key="Escape">ESC</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BẢNG ĐIỀU KHIỂN MÁY TÍNH -->
+            <div class="desktop-sidebar">
+                <div class="sidebar-title" data-vi="BẢNG ĐIỀU KHIỂN PICO-8" data-en="PICO-8 CONTROL DECK">BẢNG ĐIỀU
+                    KHIỂN PICO-8</div>
+
+                <div class="controls-legend">
+                    <div class="legend-header" data-vi="PHÍM MẶC ĐỊNH TRÊN MÁY TÍNH" data-en="DEFAULT KEYBOARD LAYOUT">
+                        PHÍM MẶC ĐỊNH TRÊN MÁY TÍNH</div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd></span>
+                        <span class="legend-desc" data-vi="DI CHUYỂN" data-en="MOVE">DI CHUYỂN</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Z</kbd><kbd>C</kbd><kbd>N</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT O" data-en="BUTTON O">NÚT O</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>X</kbd><kbd>V</kbd><kbd>M</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT X" data-en="BUTTON X">NÚT X</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Enter</kbd></span>
+                        <span class="legend-desc" data-vi="MENU TẠM DỪNG" data-en="PAUSE MENU">MENU TẠM DỪNG</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Esc</kbd></span>
+                        <span class="legend-desc" data-vi="THOÁT MENU" data-en="EXIT MENU">THOÁT MENU</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-note"
+                    data-vi="💡 Nếu bàn phím không ăn, hãy bấm một lần vào khung game để lấy tiêu điểm (focus). Bật <b>NÚT ẢO</b> ở thanh trên nếu bạn dùng màn hình cảm ứng hoặc muốn bấm bằng chuột."
+                    data-en="💡 If the keyboard does not respond, click once inside the game frame to give it focus. Toggle <b>TOUCH PAD</b> in the top bar for touch screens or mouse play."></div>
+
+                <div class="sidebar-ad-zone">
+                    <div class="sidebar-ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                    <div class="sidebar-ad-placeholder">[ GOOGLE ADSENSE SIDEBAR AD ]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            "use strict";
+
+            /* ---------------- Tiện ích chung ---------------- */
+            function $(s) { return document.querySelector(s); }
+            function lang() { return localStorage.getItem('selected_lang') || 'vi'; }
+            function t(vi, en) { return lang() === 'vi' ? vi : en; }
+
+            var toastTimer = null;
+            function showToast(msg, type) {
+                var el = $('#toast-notice');
+                el.innerText = msg;
+                el.className = 'toast active ' + (type || 'success');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () { el.classList.remove('active'); }, 2600);
+            }
+
+            window.changeLang = function (l) {
+                localStorage.setItem('selected_lang', l);
+                document.documentElement.lang = l;
+                $('#btn-lang-vi').classList.toggle('active', l === 'vi');
+                $('#btn-lang-en').classList.toggle('active', l === 'en');
+                document.querySelectorAll('[data-vi]').forEach(function (el) {
+                    var text = l === 'vi' ? el.getAttribute('data-vi') : el.getAttribute('data-en');
+                    if (text !== null) el.innerHTML = text;
+                });
+                document.title = l === 'vi'
+                    ? 'Chơi PICO-8 Online - Trình Chạy Cartridge Fantasy Console'
+                    : 'Play PICO-8 Online - Fantasy Console Cartridge Player';
+            };
+
+            function ext(name) {
+                var m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+                return m ? m[1] : '';
+            }
+
+            /* ---------------- Nạp cart ---------------- */
+
+            // Gom tệp người dùng chọn thành { html: {name, text}, js: [{name, blob}] }
+            function collect(files) {
+                var out = { html: null, js: [], raw: [] };
+                var jobs = [];
+
+                files.forEach(function (f) {
+                    var e = ext(f.name);
+                    if (e === 'html' || e === 'htm') {
+                        jobs.push(f.text().then(function (txt) { out.html = { name: f.name, text: txt }; }));
+                    } else if (e === 'js') {
+                        out.js.push({ name: f.name, blob: f });
+                    } else {
+                        out.raw.push(f.name);
+                    }
+                });
+
+                return Promise.all(jobs).then(function () { return out; });
+            }
+
+            function collectFromZip(file) {
+                return JSZip.loadAsync(file).then(function (zip) {
+                    var entries = [];
+                    zip.forEach(function (path, entry) { if (!entry.dir) entries.push(entry); });
+
+                    var htmlEntry = entries.filter(function (e) {
+                        return ['html', 'htm'].indexOf(ext(e.name)) !== -1;
+                    })[0];
+                    var jsEntries = entries.filter(function (e) { return ext(e.name) === 'js'; });
+
+                    if (!htmlEntry) throw new Error('NO_HTML');
+
+                    var out = { html: null, js: [], raw: [] };
+                    var jobs = [htmlEntry.async('text').then(function (txt) {
+                        out.html = { name: htmlEntry.name.split('/').pop(), text: txt };
+                    })];
+
+                    jsEntries.forEach(function (e) {
+                        jobs.push(e.async('blob').then(function (b) {
+                            out.js.push({ name: e.name.split('/').pop(), blob: b });
+                        }));
+                    });
+
+                    return Promise.all(jobs).then(function () { return out; });
+                });
+            }
+
+            // Thay <script src="cart.js"> bằng blob URL của tệp .js tương ứng
+            function buildDocument(bundle) {
+                var html = bundle.html.text;
+                var map = {};
+                bundle.js.forEach(function (j) {
+                    map[j.name.toLowerCase()] = URL.createObjectURL(
+                        new Blob([j.blob], { type: 'text/javascript' })
+                    );
+                });
+
+                var missing = [];
+                html = html.replace(/src\s*=\s*["']([^"']+?\.js)["']/gi, function (whole, src) {
+                    var base = src.split('/').pop().toLowerCase();
+                    if (map[base]) return 'src="' + map[base] + '"';
+                    if (/^https?:/i.test(src)) return whole;   // giữ nguyên tệp từ internet
+                    missing.push(src);
+                    return whole;
+                });
+
+                return { html: html, missing: missing };
+            }
+
+            function run(bundle) {
+                var built = buildDocument(bundle);
+                var url = URL.createObjectURL(new Blob([built.html], { type: 'text/html' }));
+                var frame = $('#pico-frame');
+                frame.src = url;
+
+                document.body.classList.add('playing');
+                frame.addEventListener('load', function () {
+                    try { frame.contentWindow.focus(); } catch (e) { /* bỏ qua */ }
+                }, { once: true });
+
+                var label = $('#btn-load-label');
+                label.setAttribute('data-vi', 'ĐỔI CART');
+                label.setAttribute('data-en', 'CHANGE CART');
+                label.innerHTML = t('ĐỔI CART', 'CHANGE CART');
+
+                // Thiếu tệp .js đi kèm thì cảnh báo (ưu tiên hơn thông báo chạy thành công)
+                if (built.missing.length) {
+                    showToast(t('⚠️ Thiếu tệp ', '⚠️ Missing file ') + built.missing.join(', ') +
+                        t(' — hãy chọn kèm tệp .js đó, hoặc nạp thẳng tệp .zip.',
+                            ' — please also pick that .js file, or load the .zip instead.'), 'warning');
+                } else {
+                    showToast(t('🍓 Đang chạy: ', '🍓 Running: ') + bundle.html.name, 'success');
+                }
+            }
+
+            function handleFiles(fileList) {
+                var files = Array.prototype.slice.call(fileList || []);
+                if (!files.length) return;
+
+                var rawCart = files.filter(function (f) {
+                    return /\.p8(\.png)?$/i.test(f.name) || ext(f.name) === 'p8';
+                });
+                var hasPlayable = files.some(function (f) {
+                    return ['html', 'htm', 'zip'].indexOf(ext(f.name)) !== -1;
+                });
+
+                if (rawCart.length && !hasPlayable) {
+                    showToast(t('❌ Cart .p8/.p8.png cần được xuất ra HTML từ PICO-8 trước khi chơi tại đây.',
+                        '❌ .p8/.p8.png carts must be exported to HTML from PICO-8 first.'), 'danger');
+                    return;
+                }
+
+                showToast(t('⏳ Đang xử lý cart...', '⏳ Preparing cart...'), 'warning');
+
+                var zip = files.filter(function (f) { return ext(f.name) === 'zip'; })[0];
+                var work = zip ? collectFromZip(zip) : collect(files);
+
+                work.then(function (bundle) {
+                    if (!bundle.html) throw new Error('NO_HTML');
+                    run(bundle);
+                }).catch(function (err) {
+                    console.error(err);
+                    if (err && err.message === 'NO_HTML') {
+                        showToast(t('❌ Không tìm thấy tệp .html của cart trong dữ liệu bạn chọn.',
+                            '❌ No cart .html file found in your selection.'), 'danger');
+                    } else {
+                        showToast(t('❌ Không đọc được cart. Vui lòng thử lại!',
+                            '❌ Could not read the cart. Please try again!'), 'danger');
+                    }
+                });
+            }
+
+            /* ---------------- Nút ảo ---------------- */
+
+            var KEYCODES = {
+                ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39,
+                KeyZ: 90, KeyX: 88, Enter: 13, Escape: 27
+            };
+            var KEYNAMES = {
+                ArrowUp: 'ArrowUp', ArrowDown: 'ArrowDown', ArrowLeft: 'ArrowLeft',
+                ArrowRight: 'ArrowRight', KeyZ: 'z', KeyX: 'x', Enter: 'Enter', Escape: 'Escape'
+            };
+
+            function sendKey(type, code) {
+                var frame = $('#pico-frame');
+                var win, doc;
+                try {
+                    win = frame.contentWindow;
+                    doc = frame.contentDocument;
+                } catch (e) { return; }
+                if (!win || !doc) return;
+
+                var init = {
+                    key: KEYNAMES[code] || code,
+                    code: code,
+                    keyCode: KEYCODES[code],
+                    which: KEYCODES[code],
+                    bubbles: true,
+                    cancelable: true
+                };
+
+                function fire(target, bubbles) {
+                    if (!target) return;
+                    var ev = new win.KeyboardEvent(type, Object.assign({}, init, { bubbles: bubbles }));
+                    // Một số trình duyệt bỏ qua keyCode trong hàm khởi tạo -> gán đè thủ công
+                    if (!ev.keyCode) {
+                        try {
+                            Object.defineProperty(ev, 'keyCode', { get: function () { return KEYCODES[code]; } });
+                            Object.defineProperty(ev, 'which', { get: function () { return KEYCODES[code]; } });
+                        } catch (e) { /* bỏ qua */ }
+                    }
+                    target.dispatchEvent(ev);
+                }
+
+                // Bắn 1 lần lên document (nổi bọt lên window) và 1 lần lên canvas
+                // nhưng KHÔNG cho nổi bọt, tránh game nhận trùng sự kiện.
+                fire(doc, true);
+                fire(doc.querySelector('canvas'), false);
+            }
+
+            function bindPad() {
+                document.querySelectorAll('.pico-key').forEach(function (btn) {
+                    var code = btn.getAttribute('data-key');
+
+                    var press = function (e) {
+                        e.preventDefault();
+                        if (btn.classList.contains('active')) return;
+                        btn.classList.add('active');
+                        sendKey('keydown', code);
+                    };
+                    var release = function (e) {
+                        e.preventDefault();
+                        if (!btn.classList.contains('active')) return;
+                        btn.classList.remove('active');
+                        sendKey('keyup', code);
+                    };
+
+                    btn.addEventListener('touchstart', press, { passive: false });
+                    btn.addEventListener('touchend', release, { passive: false });
+                    btn.addEventListener('touchcancel', release, { passive: false });
+                    btn.addEventListener('mousedown', press);
+                    btn.addEventListener('mouseup', release);
+                    btn.addEventListener('mouseleave', release);
+                });
+            }
+
+            /* ---------------- Khởi tạo ---------------- */
+
+            document.addEventListener('DOMContentLoaded', function () {
+                changeLang(lang());
+                bindPad();
+
+                // Mặc định bật nút ảo trên thiết bị cảm ứng
+                if (window.matchMedia('(pointer: coarse)').matches) {
+                    document.body.classList.add('show-pad');
+                }
+
+                $('#btn-toggle-pad').addEventListener('click', function () {
+                    document.body.classList.toggle('show-pad');
+                });
+
+                var input = $('#rom-file');
+                input.addEventListener('change', function (e) {
+                    handleFiles(e.target.files);
+                    e.target.value = '';
+                });
+
+                var zone = $('#screen-loading');
+                ['dragenter', 'dragover'].forEach(function (ev) {
+                    zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+                });
+                ['dragleave', 'drop'].forEach(function (ev) {
+                    zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('drag-over'); });
+                });
+                zone.addEventListener('drop', function (e) {
+                    handleFiles(e.dataTransfer && e.dataTransfer.files);
+                });
+            });
+        })();
+    </script>
+</body>
+
+</html>

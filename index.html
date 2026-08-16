@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Trình giả lập NES và SNES chất lượng cao trên trình duyệt Web. Không cần cài đặt, tải tệp ROM của riêng bạn và chơi trực tuyến tức thời. Hỗ trợ lưu game (Save State), tay cầm ảo và bàn phím máy tính.">
+        content="Trình giả lập NES, SNES, GBA, FBA, MAME và PICO-8 chất lượng cao trên trình duyệt Web. Không cần cài đặt, tự động chọn engine phù hợp và tự giải nén tệp ROM .zip. Hỗ trợ lưu game (Save State), bàn phím máy tính và nút bấm ảo trên điện thoại.">
     <meta name="keywords"
-        content="retro game emulator, gia lap nes, gia lap snes, choi game nes online, choi game snes online, retro games, nes emulator, snes emulator">
+        content="retro game emulator, gia lap nes, gia lap snes, gia lap gba, gia lap fba, gia lap mame, pico-8 online, choi game thung online, nes emulator, snes emulator, gba emulator, mame emulator">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://retro-game-emulator.vercel.app/index.html">
-    <title>Trình Giả Lập Game Retro Online - Chơi NES & SNES Cực Mượt</title>
+    <title>Trình Giả Lập Game Retro Online - NES, SNES, GBA, FBA, MAME, PICO-8</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -381,6 +381,13 @@
             }
         }
 
+        @media (min-width: 1024px) {
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 28px;
+            }
+        }
+
         /* RETRO CARD - TOYLIKE JOYCON STYLE */
         .system-card {
             background-color: var(--panel-color);
@@ -401,6 +408,22 @@
 
         .card-snes {
             background: #FAF8FF;
+        }
+
+        .card-gba {
+            background: #F5FBFF;
+        }
+
+        .card-fba {
+            background: #FFFBF2;
+        }
+
+        .card-mame {
+            background: #F6FFFA;
+        }
+
+        .card-pico {
+            background: #FFF8FB;
         }
 
         .system-card::before {
@@ -541,6 +564,71 @@
             box-shadow: 1px 1px 0px var(--border-color);
         }
 
+        /* Các hệ máy bổ sung: GBA / FBA / MAME / PICO-8 */
+        .card-gba .badge-8bit {
+            background-color: var(--accent-purple);
+            color: #FFFFFF;
+        }
+
+        .card-fba .badge-8bit {
+            background-color: var(--accent-red);
+            color: #FFFFFF;
+        }
+
+        .card-mame .badge-8bit {
+            background-color: var(--accent-green);
+            color: #FFFFFF;
+        }
+
+        .card-pico .badge-8bit {
+            background-color: #F76C9B;
+            color: #FFFFFF;
+        }
+
+        .card-gba .card-btn {
+            background-color: var(--accent-blue);
+            color: #FFFFFF;
+        }
+
+        .card-fba .card-btn {
+            background-color: var(--accent-yellow);
+            color: var(--text-main);
+        }
+
+        .card-mame .card-btn {
+            background-color: var(--accent-green);
+            color: #FFFFFF;
+        }
+
+        .card-pico .card-btn {
+            background-color: #F76C9B;
+            color: #FFFFFF;
+        }
+
+        .card-gba:hover .card-btn {
+            background-color: #74c2ee;
+        }
+
+        .card-fba:hover .card-btn {
+            background-color: #ffdf94;
+        }
+
+        .card-mame:hover .card-btn {
+            background-color: #4fe6bd;
+        }
+
+        .card-pico:hover .card-btn {
+            background-color: #ff9ab8;
+        }
+
+        .card-gba:active .card-btn,
+        .card-fba:active .card-btn,
+        .card-mame:active .card-btn,
+        .card-pico:active .card-btn {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--border-color);
+        }
+
         /* CHI TIẾT TÍNH NĂNG NỔI BẬT */
         .features-section {
             margin: 40px auto 10px;
@@ -673,11 +761,12 @@
                 <p style="margin: 0; font-weight: 600;">
                     <span class="terminal-prompt" data-vi="LƯU Ý:" data-en="NOTICE:">LƯU Ý:</span><span
                         id="disclaimer-text"
-                        data-vi="Hệ thống chạy giả lập trực tiếp trên trình duyệt của bạn (Client-Side). Chúng tôi hoàn toàn KHÔNG cung cấp hay lưu trữ ROM game. Vui lòng tự tải tệp tin game của riêng bạn (.nes hoặc .sfc/.smc) để bắt đầu chơi!"
-                        data-en="This emulator runs directly in your browser (Client-Side). We do NOT provide or host any ROM files. Please upload your own local game files (.nes or .sfc/.smc) to play!">Hệ
+                        data-vi="Hệ thống chạy giả lập trực tiếp trên trình duyệt của bạn (Client-Side). Chúng tôi hoàn toàn KHÔNG cung cấp hay lưu trữ ROM game. Vui lòng tự tải tệp game của riêng bạn (.nes, .sfc/.smc, .gba/.gbc/.gb, .zip game thùng hay bản xuất HTML của PICO-8) để bắt đầu chơi!"
+                        data-en="This emulator runs directly in your browser (Client-Side). We do NOT provide or host any ROM files. Please upload your own local game files (.nes, .sfc/.smc, .gba/.gbc/.gb, arcade .zip romsets or a PICO-8 HTML export) to play!">Hệ
                         thống chạy giả lập trực tiếp trên trình duyệt của bạn (Client-Side). Chúng tôi hoàn toàn KHÔNG
-                        cung cấp hay lưu trữ ROM game. Vui lòng tự tải tệp tin game của riêng bạn (.nes hoặc .sfc/.smc)
-                        để bắt đầu chơi!</span><span class="terminal-blink"></span>
+                        cung cấp hay lưu trữ ROM game. Vui lòng tự tải tệp game của riêng bạn (.nes, .sfc/.smc,
+                        .gba/.gbc/.gb, .zip game thùng hay bản xuất HTML của PICO-8) để bắt đầu chơi!</span><span
+                        class="terminal-blink"></span>
                 </p>
             </div>
         </section>
@@ -778,6 +867,162 @@
                 </div>
             </a>
 
+            <!-- THẺ MÁY GBA / GBC / GB -->
+            <a href="__Emulator/Gba.html" class="system-card card-gba" id="card-gba-emulator">
+                <div class="card-header-art">
+                    <!-- Máy Game Boy Advance nằm ngang -->
+                    <svg class="svg-icon" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="15" y="8" width="170" height="64" rx="26" fill="#e2e8f0" stroke="#2e3a59"
+                            stroke-width="3" />
+                        <!-- Vai L / R -->
+                        <rect x="24" y="4" width="26" height="10" rx="5" fill="#cbd5e1" stroke="#2e3a59"
+                            stroke-width="2" />
+                        <rect x="150" y="4" width="26" height="10" rx="5" fill="#cbd5e1" stroke="#2e3a59"
+                            stroke-width="2" />
+                        <!-- Màn hình -->
+                        <rect x="62" y="18" width="76" height="46" rx="6" fill="#334155" stroke="#1e293b"
+                            stroke-width="2" />
+                        <rect x="68" y="23" width="64" height="36" rx="3" fill="#9BBC0F" />
+                        <text x="100" y="45" font-family="'Press Start 2P', monospace" font-size="6" fill="#2e3a59"
+                            text-anchor="middle">GBA</text>
+                        <!-- D-pad -->
+                        <path d="M 40,32 L 40,52 M 30,42 L 50,42" stroke="#1e293b" stroke-width="7"
+                            stroke-linecap="square" />
+                        <!-- Nút A / B -->
+                        <circle cx="168" cy="34" r="6.5" fill="#4EA8DE" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="152" cy="46" r="6.5" fill="#B176F0" stroke="#1e293b" stroke-width="2" />
+                        <text x="168" y="36.5" font-family="sans-serif" font-size="5" font-weight="bold" fill="#fff"
+                            text-anchor="middle">A</text>
+                        <text x="152" y="48.5" font-family="sans-serif" font-size="5" font-weight="bold" fill="#fff"
+                            text-anchor="middle">B</text>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="badge-8bit" data-vi="CẦM TAY 32-BIT" data-en="32-BIT HANDHELD">CẦM TAY 32-BIT</span>
+                    <h2 class="card-title" data-vi="Giả Lập GBA" data-en="GBA Emulator">Giả Lập GBA</h2>
+                    <p class="card-desc"
+                        data-vi="Chơi cả ba dòng Game Boy: .gba chạy mGBA, .gb/.gbc chạy Gambatte. Hệ thống tự chọn engine và tự giải nén tệp .zip giúp bạn."
+                        data-en="Covers all three Game Boy lines: .gba runs on mGBA, .gb/.gbc on Gambatte. The engine is auto-selected and .zip archives are auto-extracted.">
+                        Chơi cả ba dòng Game Boy...</p>
+                    <button class="card-btn" type="button" data-vi="CHƠI NGAY 🚀" data-en="PLAY NOW 🚀">CHƠI NGAY
+                        🚀</button>
+                </div>
+            </a>
+
+            <!-- THẺ MÁY FBA -->
+            <a href="__Emulator/Fba.html" class="system-card card-fba" id="card-fba-emulator">
+                <div class="card-header-art">
+                    <!-- Bàn điều khiển game thùng: cần gạt + 6 nút -->
+                    <svg class="svg-icon" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="12" y="10" width="176" height="60" rx="10" fill="#e2e8f0" stroke="#2e3a59"
+                            stroke-width="3" />
+                        <rect x="20" y="17" width="160" height="46" rx="6" fill="#f8fafc" />
+                        <!-- Cần gạt -->
+                        <ellipse cx="55" cy="56" rx="20" ry="6" fill="#cbd5e1" stroke="#2e3a59" stroke-width="2" />
+                        <line x1="55" y1="54" x2="55" y2="32" stroke="#1e293b" stroke-width="5"
+                            stroke-linecap="round" />
+                        <circle cx="55" cy="29" r="9" fill="#FF6B6B" stroke="#1e293b" stroke-width="2.5" />
+                        <!-- 6 nút bấm -->
+                        <circle cx="112" cy="32" r="7" fill="#FFD166" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="132" cy="29" r="7" fill="#FFD166" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="152" cy="30" r="7" fill="#FFD166" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="112" cy="52" r="7" fill="#4EA8DE" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="132" cy="49" r="7" fill="#4EA8DE" stroke="#1e293b" stroke-width="2" />
+                        <circle cx="152" cy="50" r="7" fill="#4EA8DE" stroke="#1e293b" stroke-width="2" />
+                        <text x="100" y="16" font-family="'Press Start 2P', monospace" font-size="5" fill="#FF6B6B"
+                            text-anchor="middle">FINALBURN</text>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="badge-8bit" data-vi="GAME THÙNG" data-en="ARCADE">GAME THÙNG</span>
+                    <h2 class="card-title" data-vi="Giả Lập FBA" data-en="FBA Emulator">Giả Lập FBA</h2>
+                    <p class="card-desc"
+                        data-vi="Game thùng CPS-1, CPS-2 và Neo Geo. Hệ thống đọc tên bộ ROM để tự chọn engine FB Alpha CPS-1/CPS-2 hoặc FinalBurn Neo."
+                        data-en="CPS-1, CPS-2 and Neo Geo arcade boards. The romset name is used to auto-select FB Alpha CPS-1/CPS-2 or FinalBurn Neo.">
+                        Game thùng CPS-1, CPS-2 và Neo Geo...</p>
+                    <button class="card-btn" type="button" data-vi="CHƠI NGAY 🚀" data-en="PLAY NOW 🚀">CHƠI NGAY
+                        🚀</button>
+                </div>
+            </a>
+
+            <!-- THẺ MÁY MAME -->
+            <a href="__Emulator/Mame.html" class="system-card card-mame" id="card-mame-emulator">
+                <div class="card-header-art">
+                    <!-- Thùng máy game arcade -->
+                    <svg class="svg-icon" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="62" y="4" width="76" height="72" rx="10" fill="#e2e8f0" stroke="#2e3a59"
+                            stroke-width="3" />
+                        <rect x="70" y="11" width="60" height="34" rx="4" fill="#334155" stroke="#1e293b"
+                            stroke-width="2" />
+                        <rect x="75" y="16" width="50" height="24" rx="2" fill="#06D6A0" />
+                        <text x="100" y="31" font-family="'Press Start 2P', monospace" font-size="5" fill="#0f172a"
+                            text-anchor="middle">MAME</text>
+                        <!-- Bảng điều khiển -->
+                        <rect x="68" y="50" width="64" height="18" rx="4" fill="#cbd5e1" stroke="#2e3a59"
+                            stroke-width="2" />
+                        <line x1="80" y1="60" x2="80" y2="53" stroke="#1e293b" stroke-width="3"
+                            stroke-linecap="round" />
+                        <circle cx="80" cy="52" r="4" fill="#FF6B6B" stroke="#1e293b" stroke-width="1.5" />
+                        <circle cx="100" cy="59" r="3.5" fill="#FFD166" stroke="#1e293b" stroke-width="1.5" />
+                        <circle cx="112" cy="59" r="3.5" fill="#4EA8DE" stroke="#1e293b" stroke-width="1.5" />
+                        <circle cx="124" cy="59" r="3.5" fill="#B176F0" stroke="#1e293b" stroke-width="1.5" />
+                        <!-- Khe nhét xu -->
+                        <rect x="92" y="70" width="16" height="3" rx="1.5" fill="#64748b" />
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="badge-8bit" data-vi="GAME THÙNG" data-en="ARCADE">GAME THÙNG</span>
+                    <h2 class="card-title" data-vi="Giả Lập MAME" data-en="MAME Emulator">Giả Lập MAME</h2>
+                    <p class="card-desc"
+                        data-vi="Kho game thùng kinh điển chạy trên engine MAME 2003-Plus, có thể đổi sang MAME 2003 hoặc FBNeo khi bộ ROM khác phiên bản."
+                        data-en="The classic arcade library on the MAME 2003-Plus engine, switchable to MAME 2003 or FBNeo for other romset versions.">
+                        Kho game thùng kinh điển...</p>
+                    <button class="card-btn" type="button" data-vi="CHƠI NGAY 🚀" data-en="PLAY NOW 🚀">CHƠI NGAY
+                        🚀</button>
+                </div>
+            </a>
+
+            <!-- THẺ MÁY PICO-8 -->
+            <a href="__Emulator/Pico8.html" class="system-card card-pico" id="card-pico-emulator">
+                <div class="card-header-art">
+                    <!-- Fantasy console PICO-8 -->
+                    <svg class="svg-icon" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="45" y="6" width="110" height="68" rx="12" fill="#2b2f3d" stroke="#2e3a59"
+                            stroke-width="3" />
+                        <rect x="56" y="14" width="88" height="40" rx="4" fill="#0f1020" stroke="#000"
+                            stroke-width="2" />
+                        <!-- Trái tim pixel -->
+                        <g fill="#F76C9B">
+                            <rect x="82" y="24" width="6" height="6" />
+                            <rect x="88" y="20" width="6" height="6" />
+                            <rect x="94" y="20" width="6" height="6" />
+                            <rect x="100" y="24" width="6" height="6" />
+                            <rect x="76" y="30" width="36" height="6" />
+                            <rect x="82" y="36" width="24" height="6" />
+                            <rect x="88" y="42" width="12" height="6" />
+                        </g>
+                        <!-- D-pad và nút O / X -->
+                        <path d="M 66,64 L 66,70 M 63,67 L 69,67" stroke="#e7e9f2" stroke-width="4"
+                            stroke-linecap="square" />
+                        <circle cx="128" cy="66" r="5" fill="none" stroke="#e7e9f2" stroke-width="2.5" />
+                        <path d="M 138,62 L 146,70 M 146,62 L 138,70" stroke="#e7e9f2" stroke-width="2.5"
+                            stroke-linecap="round" />
+                        <text x="100" y="70" font-family="'Press Start 2P', monospace" font-size="5" fill="#FFD166"
+                            text-anchor="middle">PICO-8</text>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="badge-8bit" data-vi="FANTASY CONSOLE" data-en="FANTASY CONSOLE">FANTASY CONSOLE</span>
+                    <h2 class="card-title" data-vi="Chơi PICO-8" data-en="PICO-8 Player">Chơi PICO-8</h2>
+                    <p class="card-desc"
+                        data-vi="Nạp bản xuất HTML của cart PICO-8 (.zip hoặc .html + .js) và chơi ngay, kèm cụm nút ảo D-Pad + O/X cho điện thoại."
+                        data-en="Load a PICO-8 HTML export (.zip or .html + .js) and play instantly, with an on-screen D-Pad and O/X buttons for phones.">
+                        Nạp bản xuất HTML của cart PICO-8...</p>
+                    <button class="card-btn" type="button" data-vi="CHƠI NGAY 🚀" data-en="PLAY NOW 🚀">CHƠI NGAY
+                        🚀</button>
+                </div>
+            </a>
+
         </section>
 
         <!-- TÍNH NĂNG NỔI BẬT -->
@@ -862,11 +1107,11 @@
 
             // Tối ưu SEO tiêu đề & mô tả cho từng ngôn ngữ
             if (lang === 'vi') {
-                document.title = "Trình Giả Lập Game Retro Online - Chơi NES & SNES Cực Mượt";
-                document.querySelector('meta[name="description"]').setAttribute('content', 'Trình giả lập NES và SNES chất lượng cao trên trình duyệt Web. Không cần cài đặt, tải tệp ROM của riêng bạn và chơi trực tuyến tức thì. Hỗ trợ lưu game (Save State), tay cầm ảo và bàn phím máy tính.');
+                document.title = "Trình Giả Lập Game Retro Online - NES, SNES, GBA, FBA, MAME, PICO-8";
+                document.querySelector('meta[name="description"]').setAttribute('content', 'Trình giả lập NES, SNES, GBA, FBA, MAME và PICO-8 chất lượng cao trên trình duyệt Web. Không cần cài đặt, tự động chọn engine phù hợp và tự giải nén tệp ROM .zip. Hỗ trợ lưu game (Save State), bàn phím máy tính và nút bấm ảo trên điện thoại.');
             } else {
-                document.title = "Retro Game Emulator Online - Play NES & SNES Games";
-                document.querySelector('meta[name="description"]').setAttribute('content', 'High-quality online NES and SNES web-based emulator. No install required, load your own ROM files and play instantly with save states, gamepad and keyboard support.');
+                document.title = "Retro Game Emulator Online - NES, SNES, GBA, FBA, MAME, PICO-8";
+                document.querySelector('meta[name="description"]').setAttribute('content', 'High-quality online emulator for NES, SNES, GBA, FBA, MAME and PICO-8. No install required, automatic engine selection, automatic .zip extraction, save states, keyboard and on-screen touch controls.');
             }
         }
 

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description"
+        content="Trình giả lập Game Boy Advance, Game Boy Color và Game Boy trực tuyến. Tự động nhận diện engine theo tệp ROM (.gba, .gbc, .gb) và tự giải nén tệp .zip. Chơi bằng bàn phím máy tính hoặc nút bấm ảo trên điện thoại.">
+    <meta name="keywords"
+        content="gia lap gba, gia lap game boy, gba emulator online, gbc emulator, choi game gba online">
+    <title>Trình Giả Lập GBA / GBC / GB Online - Tự Động Chọn Engine</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300..700&family=Lexend:wght@300..800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/player.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="../extends.js"></script>
+</head>
+
+<body>
+
+    <div id="toast-notice" class="toast">🎮</div>
+    <a href="../index.html" class="floating-exit" title="Trang chủ">←</a>
+
+    <div class="container">
+        <!-- THANH CÔNG CỤ -->
+        <div class="top-bar">
+            <div class="logo-wrapper">
+                <a href="../index.html" class="back-btn" title="Trang chủ">←</a>
+                <div class="logo" data-vi="🕹️ GAME BOY ADVANCE" data-en="🕹️ GAME BOY ADVANCE">🕹️ GAME BOY ADVANCE</div>
+            </div>
+
+            <div class="sys-controls">
+                <div class="lang-switch-container">
+                    <button class="lang-btn active" id="btn-lang-vi" onclick="changeLang('vi')">VI</button>
+                    <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
+                </div>
+
+                <label for="rom-file" class="bar-btn file-input-label" id="btn-load-label" data-vi="NẠP ROM"
+                    data-en="LOAD ROM">NẠP ROM</label>
+                <input type="file" id="rom-file" accept=".gba,.gbc,.gb,.sgb,.zip,.7z">
+            </div>
+        </div>
+
+        <!-- QUẢNG CÁO (ĐIỆN THOẠI) -->
+        <div id="adsense-top-zone">
+            <div class="ads-placeholder" data-vi="[ KHU VỰC QUẢNG CÁO ]" data-en="[ ADVERTISEMENT ZONE ]">[ KHU VỰC
+                QUẢNG CÁO ]</div>
+        </div>
+
+        <div class="main-layout">
+            <div class="screen-area">
+                <!-- MÀN HÌNH CHỜ -->
+                <div class="screen-container" id="screen-loading">
+                    <div class="welcome-box">
+                        <div class="welcome-mascot" onclick="document.getElementById('rom-file').click();">👾</div>
+                        <h2 class="welcome-title" data-vi="Game Boy Advance Online" data-en="Game Boy Advance Online">
+                            Game Boy Advance Online</h2>
+                        <p class="welcome-desc"
+                            data-vi="Kéo thả hoặc chọn tệp ROM của bạn. Hệ thống <b>tự động chọn engine</b>: mGBA cho tệp .gba, Gambatte cho tệp .gb/.gbc — và <b>tự giải nén tệp .zip</b> trước khi chạy."
+                            data-en="Drag &amp; drop or pick your ROM file. The system <b>auto-selects the engine</b>: mGBA for .gba, Gambatte for .gb/.gbc — and <b>auto-extracts .zip archives</b> before booting.">
+                            Kéo thả hoặc chọn tệp ROM của bạn.</p>
+
+                        <div class="chip-row">
+                            <span class="chip">.GBA → mGBA</span>
+                            <span class="chip blue">.GBC / .GB → Gambatte</span>
+                            <span class="chip green">.ZIP → tự giải nén</span>
+                        </div>
+
+                        <div class="engine-row">
+                            <span class="engine-label" data-vi="ENGINE:" data-en="ENGINE:">ENGINE:</span>
+                            <select class="engine-select" id="engine-select" title="Engine"></select>
+                        </div>
+
+                        <div class="terminal-disclaimer">
+                            <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
+                                data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
+                                data-vi="Giả lập chạy hoàn toàn trên trình duyệt của bạn (client-side). Chúng tôi không lưu trữ hay phân phối bất kỳ tệp ROM nào. Trên máy tính dùng bàn phím hoặc tay cầm USB, trên điện thoại dùng cụm nút ảo hiển thị trực tiếp trên màn hình."
+                                data-en="The emulator runs fully client-side in your browser. We do not host or distribute any ROM files. Use a keyboard or USB gamepad on desktop, or the on-screen touch buttons on mobile.">Giả
+                                lập chạy hoàn toàn trên trình duyệt của bạn (client-side).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KHUNG GIẢ LẬP -->
+                <div class="game-wrapper" id="game-container">
+                    <div id="ejs-game"></div>
+                </div>
+            </div>
+
+            <!-- BẢNG ĐIỀU KHIỂN MÁY TÍNH -->
+            <div class="desktop-sidebar">
+                <div class="sidebar-title" data-vi="BẢNG ĐIỀU KHIỂN GBA" data-en="GBA CONTROL DECK">BẢNG ĐIỀU KHIỂN GBA
+                </div>
+
+                <div class="controls-legend">
+                    <div class="legend-header" data-vi="PHÍM MẶC ĐỊNH TRÊN MÁY TÍNH" data-en="DEFAULT KEYBOARD LAYOUT">
+                        PHÍM MẶC ĐỊNH TRÊN MÁY TÍNH</div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd></span>
+                        <span class="legend-desc" data-vi="DI CHUYỂN (D-PAD)" data-en="MOVE (D-PAD)">DI CHUYỂN
+                            (D-PAD)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Z</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT A" data-en="BUTTON A">NÚT A</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>X</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT B" data-en="BUTTON B">NÚT B</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Q</kbd></span>
+                        <span class="legend-desc" data-vi="VAI TRÁI (L)" data-en="SHOULDER L">VAI TRÁI (L)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>E</kbd></span>
+                        <span class="legend-desc" data-vi="VAI PHẢI (R)" data-en="SHOULDER R">VAI PHẢI (R)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>V</kbd></span>
+                        <span class="legend-desc" data-vi="SELECT" data-en="SELECT">SELECT</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Enter</kbd></span>
+                        <span class="legend-desc" data-vi="START" data-en="START">START</span>
+                    </div>
+                    <div class="legend-item" style="border-top: 2px dashed var(--border-color); padding-top: 8px;">
+                        <span class="legend-key"><kbd>F6</kbd></span>
+                        <span class="legend-desc" data-vi="LƯU NHANH" data-en="QUICK SAVE">LƯU NHANH</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>F9</kbd></span>
+                        <span class="legend-desc" data-vi="NẠP NHANH" data-en="QUICK LOAD">NẠP NHANH</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-note"
+                    data-vi="💡 Bạn có thể đổi phím bất kỳ lúc nào trong menu ⚙️ của khung giả lập (mục Control Settings), và cắm tay cầm USB/Bluetooth để chơi ngay. Trên điện thoại, cụm nút ảo và D-Pad hiện tự động trên màn hình."
+                    data-en="💡 Remap any key anytime from the ⚙️ menu inside the emulator (Control Settings); USB/Bluetooth gamepads work out of the box. On phones, the on-screen D-Pad and buttons appear automatically.">
+                </div>
+
+                <div class="sidebar-ad-zone">
+                    <div class="sidebar-ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                    <div class="sidebar-ad-placeholder">[ GOOGLE ADSENSE SIDEBAR AD ]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.RETRO_CONFIG = {
+            family: 'gb',
+            accept: '.gba,.gbc,.gb,.sgb,.zip,.7z',
+            title: {
+                vi: 'Trình Giả Lập GBA / GBC / GB Online - Tự Động Chọn Engine',
+                en: 'GBA / GBC / GB Emulator Online - Auto Engine Selection'
+            }
+        };
+    </script>
+    <script src="assets/player.js"></script>
+</body>
+
+</html>
