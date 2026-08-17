@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description"
+        content="Trình giả lập MAME trực tuyến cho game thùng cổ điển: Contra, Cadillacs, Metal Slug, Pac-Man, 1943. Tự động chọn engine MAME 2003-Plus / MAME 2003 phù hợp bộ ROM. Hỗ trợ bàn phím máy tính và nút bấm ảo trên điện thoại.">
+    <meta name="keywords"
+        content="gia lap mame, mame emulator online, choi game thung online, mame2003, arcade emulator">
+    <title>Trình Giả Lập MAME Online - Chơi Game Thùng Cổ Điển</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@300..700&family=Lexend:wght@300..800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/player.css">
+    <script src="../extends.js"></script>
+</head>
+
+<body>
+
+    <div id="toast-notice" class="toast">🎰</div>
+    <a href="../index.html" class="floating-exit" title="Trang chủ">←</a>
+
+    <div class="container">
+        <!-- THANH CÔNG CỤ -->
+        <div class="top-bar">
+            <div class="logo-wrapper">
+                <a href="../index.html" class="back-btn" title="Trang chủ">←</a>
+                <div class="logo" data-vi="🎰 MAME ARCADE" data-en="🎰 MAME ARCADE">🎰 MAME ARCADE</div>
+            </div>
+
+            <div class="sys-controls">
+                <div class="lang-switch-container">
+                    <button class="lang-btn active" id="btn-lang-vi" onclick="changeLang('vi')">VI</button>
+                    <button class="lang-btn" id="btn-lang-en" onclick="changeLang('en')">EN</button>
+                </div>
+
+                <label for="bios-file" class="bar-btn" data-vi="BIOS" data-en="BIOS">BIOS</label>
+                <input type="file" id="bios-file" accept=".zip">
+
+                <label for="rom-file" class="bar-btn file-input-label" id="btn-load-label" data-vi="NẠP ROM"
+                    data-en="LOAD ROM">NẠP ROM</label>
+                <input type="file" id="rom-file" accept=".zip,.7z">
+            </div>
+        </div>
+
+        <!-- QUẢNG CÁO (ĐIỆN THOẠI) -->
+        <div id="adsense-top-zone">
+            <div class="ads-placeholder" data-vi="[ KHU VỰC QUẢNG CÁO ]" data-en="[ ADVERTISEMENT ZONE ]">[ KHU VỰC
+                QUẢNG CÁO ]</div>
+        </div>
+
+        <div class="main-layout">
+            <div class="screen-area">
+                <!-- MÀN HÌNH CHỜ -->
+                <div class="screen-container" id="screen-loading">
+                    <div class="welcome-box">
+                        <div class="welcome-mascot" onclick="document.getElementById('rom-file').click();">🎰</div>
+                        <h2 class="welcome-title" data-vi="MAME Arcade Online" data-en="MAME Arcade Online">MAME Arcade
+                            Online</h2>
+                        <p class="welcome-desc"
+                            data-vi="Kéo thả bộ ROM game thùng (giữ nguyên tệp <b>.zip</b>). Hệ thống <b>tự chọn engine MAME 2003-Plus</b> — bản tương thích rộng nhất — và bạn có thể đổi sang MAME 2003 hoặc FBNeo nếu bộ ROM thuộc phiên bản khác."
+                            data-en="Drag &amp; drop your arcade romset (keep the <b>.zip</b>). The system <b>auto-selects MAME 2003-Plus</b> — the widest-compatibility build — and you can switch to MAME 2003 or FBNeo for other romset versions.">
+                            Kéo thả bộ ROM game thùng.</p>
+
+                        <div class="chip-row">
+                            <span class="chip">MAME 2003-Plus</span>
+                            <span class="chip blue">MAME 2003</span>
+                            <span class="chip green">FBNeo (dự phòng)</span>
+                        </div>
+
+                        <div class="engine-row">
+                            <span class="engine-label" data-vi="ENGINE:" data-en="ENGINE:">ENGINE:</span>
+                            <select class="engine-select" id="engine-select" title="Engine"></select>
+                        </div>
+
+                        <div class="terminal-disclaimer">
+                            <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
+                                data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
+                                data-vi="Bộ ROM phải đúng phiên bản MAME 0.78 (2003) thì mới chạy được — đây là giới hạn của engine, không phải lỗi trình duyệt. Nếu báo lỗi thiếu tệp, hãy thử engine khác trong ô chọn phía trên. Game Neo Geo cần thêm BIOS <b>neogeo.zip</b>."
+                                data-en="Romsets must match the MAME 0.78 (2003) set — this is an engine limitation, not a browser issue. If files are reported missing, try another engine in the selector above. Neo Geo games also need the <b>neogeo.zip</b> BIOS.">Bộ
+                                ROM phải đúng phiên bản MAME 0.78 (2003).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KHUNG GIẢ LẬP -->
+                <div class="game-wrapper" id="game-container">
+                    <div id="ejs-game"></div>
+                </div>
+            </div>
+
+            <!-- BẢNG ĐIỀU KHIỂN MÁY TÍNH -->
+            <div class="desktop-sidebar">
+                <div class="sidebar-title" data-vi="BẢNG ĐIỀU KHIỂN MAME" data-en="MAME CONTROL DECK">BẢNG ĐIỀU KHIỂN
+                    MAME</div>
+
+                <div class="controls-legend">
+                    <div class="legend-header" data-vi="PHÍM MẶC ĐỊNH TRÊN MÁY TÍNH" data-en="DEFAULT KEYBOARD LAYOUT">
+                        PHÍM MẶC ĐỊNH TRÊN MÁY TÍNH</div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd></span>
+                        <span class="legend-desc" data-vi="CẦN GẠT (JOYSTICK)" data-en="JOYSTICK">CẦN GẠT
+                            (JOYSTICK)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>S</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT 1" data-en="BUTTON 1">NÚT 1</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>A</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT 2" data-en="BUTTON 2">NÚT 2</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Q</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT 3" data-en="BUTTON 3">NÚT 3</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>X</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT 4" data-en="BUTTON 4">NÚT 4</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Z</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT 5" data-en="BUTTON 5">NÚT 5</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>E</kbd></span>
+                        <span class="legend-desc" data-vi="NÚT 6" data-en="BUTTON 6">NÚT 6</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>V</kbd></span>
+                        <span class="legend-desc" data-vi="NHÉT XU (COIN)" data-en="INSERT COIN">NHÉT XU (COIN)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>Enter</kbd></span>
+                        <span class="legend-desc" data-vi="START" data-en="START">START</span>
+                    </div>
+                    <div class="legend-item" style="border-top: 2px dashed var(--border-color); padding-top: 8px;">
+                        <span class="legend-key"><kbd>F6</kbd></span>
+                        <span class="legend-desc" data-vi="LƯU NHANH" data-en="QUICK SAVE">LƯU NHANH</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-key"><kbd>F9</kbd></span>
+                        <span class="legend-desc" data-vi="NẠP NHANH" data-en="QUICK LOAD">NẠP NHANH</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-note"
+                    data-vi="💡 Muốn vào game: bấm <b>V</b> để nhét xu rồi <b>Enter</b> để Start. Có thể đổi phím trong menu ⚙️ của khung giả lập, hoặc cắm tay cầm USB. Trên điện thoại có sẵn cần gạt ảo + 6 nút + Coin/Start."
+                    data-en="💡 To start a game: press <b>V</b> to insert a coin, then <b>Enter</b> for Start. Keys can be remapped in the ⚙️ menu, and USB gamepads work out of the box. Mobile shows a virtual stick, 6 buttons and Coin/Start.">
+                </div>
+
+                <div class="sidebar-ad-zone">
+                    <div class="sidebar-ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
+                    <div class="sidebar-ad-placeholder">[ GOOGLE ADSENSE SIDEBAR AD ]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cụm nút ảo cho game thùng: cần gạt + 6 nút + Coin + Start
+        var ARCADE_PAD = [
+            { type: "dpad", id: "dpad", location: "left", left: "50%", top: "50%", joystickInput: false, inputValues: [4, 5, 6, 7] },
+            { type: "button", text: "1", id: "btn_1", location: "right", right: 145, top: 0, bold: true, input_value: 1 },
+            { type: "button", text: "2", id: "btn_2", location: "right", right: 75, top: 0, bold: true, input_value: 9 },
+            { type: "button", text: "3", id: "btn_3", location: "right", right: 5, top: 0, bold: true, input_value: 10 },
+            { type: "button", text: "4", id: "btn_4", location: "right", right: 145, top: 70, bold: true, input_value: 0 },
+            { type: "button", text: "5", id: "btn_5", location: "right", right: 75, top: 70, bold: true, input_value: 8 },
+            { type: "button", text: "6", id: "btn_6", location: "right", right: 5, top: 70, bold: true, input_value: 11 },
+            { type: "button", text: "Coin", id: "select", location: "center", left: -5, fontSize: 15, block: true, input_value: 2 },
+            { type: "button", text: "Start", id: "start", location: "center", left: 60, fontSize: 15, block: true, input_value: 3 }
+        ];
+
+        window.RETRO_CONFIG = {
+            family: 'mame',
+            accept: '.zip,.7z',
+            virtualGamepad: ARCADE_PAD,
+            title: {
+                vi: 'Trình Giả Lập MAME Online - Chơi Game Thùng Cổ Điển',
+                en: 'MAME Arcade Emulator Online - Play Classic Arcade Games'
+            }
+        };
+    </script>
+    <script src="assets/player.js"></script>
+</body>
+
+</html>
