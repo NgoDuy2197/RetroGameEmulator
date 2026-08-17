@@ -211,6 +211,136 @@
                 height: 170px;
             }
         }
+
+        /* ---- Chuyển chế độ nạp cart ---- */
+        .mode-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .mode-tab {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 11.5px;
+            padding: 7px 12px;
+            border: 2.5px solid var(--border-color);
+            border-radius: 14px;
+            background: #FFFFFF;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: 2px 2px 0px var(--border-color);
+            transition: all 0.12s ease;
+        }
+
+        .mode-tab:hover {
+            background: var(--accent-yellow);
+        }
+
+        .mode-tab.active {
+            background: #F76C9B;
+            color: #FFFFFF;
+        }
+
+        .mode-panel {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 13px;
+            width: 100%;
+        }
+
+        .mode-panel.active {
+            display: flex;
+        }
+
+        .bbs-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bbs-input {
+            flex: 1;
+            min-width: 190px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 9px 12px;
+            border: 2.5px solid var(--border-color);
+            border-radius: 14px;
+            color: var(--text-main);
+            background: #FFFFFF;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .action-btn-big {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            padding: 9px 18px;
+            border: 3px solid var(--border-color);
+            border-radius: 14px;
+            background: #F76C9B;
+            color: #FFFFFF;
+            cursor: pointer;
+            box-shadow: 2.5px 2.5px 0px var(--border-color);
+            text-transform: uppercase;
+        }
+
+        .action-btn-big:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        /* ---- Chế độ nhúng site ngoài (Education / BBS) ---- */
+        body.external-mode .pico-pad {
+            display: none !important;
+        }
+
+        body.external-mode #btn-toggle-pad {
+            display: none;
+        }
+
+        .external-hint {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-shrink: 0;
+            padding: 7px 12px;
+            background: #FFF3F7;
+            border-bottom: 2px solid var(--border-color);
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        body.external-mode .external-hint {
+            display: flex;
+        }
+
+        .external-hint button {
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0 4px;
+        }
+
+        @media (max-width: 1023px) and (orientation: landscape) {
+            body.playing .external-hint {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -254,29 +384,100 @@
                     <div class="welcome-box">
                         <div class="welcome-mascot" onclick="document.getElementById('rom-file').click();">🍓</div>
                         <h2 class="welcome-title" data-vi="PICO-8 Online" data-en="PICO-8 Online">PICO-8 Online</h2>
-                        <p class="welcome-desc"
-                            data-vi="Nạp <b>bản xuất HTML</b> của cart PICO-8: chọn tệp <b>.zip</b> (tự giải nén) hoặc chọn cùng lúc cả hai tệp <b>.html + .js</b>. Trò chơi chạy ngay trên trang này, kèm cụm nút ảo cho điện thoại."
-                            data-en="Load a PICO-8 <b>HTML export</b>: pick the <b>.zip</b> (auto-extracted) or select both the <b>.html + .js</b> files together. The cart runs right here, with on-screen buttons for phones.">
-                            Nạp bản xuất HTML của cart PICO-8.</p>
 
-                        <div class="chip-row">
-                            <span class="chip">.ZIP → tự giải nén</span>
-                            <span class="chip blue">.HTML + .JS</span>
-                            <span class="chip green">D-Pad + O/X ảo</span>
+                        <!-- CHỌN CÁCH NẠP CART -->
+                        <div class="mode-tabs">
+                            <button class="mode-tab active" data-mode="local" data-vi="📦 BẢN XUẤT HTML"
+                                data-en="📦 HTML EXPORT">📦 BẢN XUẤT HTML</button>
+                            <button class="mode-tab" data-mode="edu" data-vi="🎓 EDUCATION (.P8)"
+                                data-en="🎓 EDUCATION (.P8)">🎓 EDUCATION (.P8)</button>
+                            <button class="mode-tab" data-mode="bbs" data-vi="🌐 CART TRÊN BBS"
+                                data-en="🌐 BBS CART">🌐 CART TRÊN BBS</button>
                         </div>
 
-                        <div class="terminal-disclaimer">
-                            <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
-                                data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
-                                data-vi="Trang này chạy bản xuất HTML do chính PICO-8 tạo ra (menu <i>Export &gt; cart.html</i>) hoặc bản xuất tải từ BBS. Tệp cart thô <b>.p8 / .p8.png</b> không chạy trực tiếp được vì cần lõi PICO-8 bản quyền của Lexaloffle — hãy dùng PICO-8 (hoặc Education Edition) để xuất ra HTML trước."
-                                data-en="This page runs the HTML export produced by PICO-8 itself (<i>Export &gt; cart.html</i>) or downloaded from the BBS. Raw <b>.p8 / .p8.png</b> carts cannot run here because they need Lexaloffle's licensed PICO-8 runtime — export them to HTML from PICO-8 (or the Education Edition) first.">Trang
-                                này chạy bản xuất HTML do chính PICO-8 tạo ra.</span>
+                        <!-- CHẾ ĐỘ 1: BẢN XUẤT HTML (chạy hoàn toàn trên máy bạn) -->
+                        <div class="mode-panel active" id="panel-local">
+                            <p class="welcome-desc"
+                                data-vi="Nạp <b>bản xuất HTML</b> của cart PICO-8: chọn tệp <b>.zip</b> (tự giải nén) hoặc chọn cùng lúc cả hai tệp <b>.html + .js</b>. Trò chơi chạy ngay trên trang này, kèm cụm nút ảo cho điện thoại."
+                                data-en="Load a PICO-8 <b>HTML export</b>: pick the <b>.zip</b> (auto-extracted) or select both the <b>.html + .js</b> files together. The cart runs right here, with on-screen buttons for phones.">
+                                Nạp bản xuất HTML của cart PICO-8.</p>
+
+                            <div class="chip-row">
+                                <span class="chip">.ZIP → tự giải nén</span>
+                                <span class="chip blue">.HTML + .JS</span>
+                                <span class="chip green">D-Pad + O/X ảo</span>
+                            </div>
+
+                            <button class="action-btn-big" onclick="document.getElementById('rom-file').click();"
+                                data-vi="CHỌN TỆP CART" data-en="PICK CART FILES">CHỌN TỆP CART</button>
+
+                            <div class="terminal-disclaimer">
+                                <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
+                                    data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
+                                    data-vi="Chế độ này chạy 100% trên máy bạn, không gửi tệp đi đâu cả. Tệp cart thô <b>.p8 / .p8.png</b> không chạy được ở đây vì cần lõi PICO-8 bản quyền của Lexaloffle — hãy dùng tab <b>Education</b> bên cạnh."
+                                    data-en="This mode runs 100% on your device and uploads nothing. Raw <b>.p8 / .p8.png</b> carts cannot run here because they need Lexaloffle's licensed PICO-8 runtime — use the <b>Education</b> tab instead.">Chế
+                                    độ này chạy 100% trên máy bạn.</span>
+                            </div>
+                        </div>
+
+                        <!-- CHẾ ĐỘ 2: NHÚNG PICO-8 EDUCATION EDITION -->
+                        <div class="mode-panel" id="panel-edu">
+                            <p class="welcome-desc"
+                                data-vi="Nhúng <b>PICO-8 Education Edition</b> (bản web miễn phí của Lexaloffle) ngay trong trang. Bấm ▶ khởi động, <b>kéo thả tệp .p8 / .p8.png</b> vào màn hình rồi gõ <b>RUN</b> — không cần xuất HTML."
+                                data-en="Embeds the free <b>PICO-8 Education Edition</b> by Lexaloffle right here. Press ▶ to boot, <b>drag &amp; drop your .p8 / .p8.png</b> onto the screen, then type <b>RUN</b> — no HTML export needed.">
+                                Nhúng PICO-8 Education Edition.</p>
+
+                            <div class="chip-row">
+                                <span class="chip">.P8 kéo thả</span>
+                                <span class="chip blue">.P8.PNG</span>
+                                <span class="chip green">Nút cảm ứng sẵn có</span>
+                            </div>
+
+                            <button class="action-btn-big" id="btn-open-edu" data-vi="MỞ EDUCATION EDITION"
+                                data-en="OPEN EDUCATION EDITION">MỞ EDUCATION EDITION</button>
+
+                            <div class="terminal-disclaimer">
+                                <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
+                                    data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
+                                    data-vi="Khung này tải trực tiếp từ máy chủ <b>pico-8-edu.com</b> của Lexaloffle nên cần mạng, và vì là trang của bên khác nên nút <i>NẠP CART</i> hay cụm nút ảo của chúng tôi không điều khiển vào trong được — hãy kéo thả tệp và dùng bàn phím / nút cảm ứng sẵn có của họ."
+                                    data-en="The frame loads directly from Lexaloffle's <b>pico-8-edu.com</b>, so it needs a connection. Because it is another site, our <i>LOAD CART</i> button and touch pad cannot reach inside — drag your file in and use their own keyboard / touch controls.">Khung
+                                    này tải trực tiếp từ máy chủ pico-8-edu.com.</span>
+                            </div>
+                        </div>
+
+                        <!-- CHẾ ĐỘ 3: CART CÔNG KHAI TRÊN BBS -->
+                        <div class="mode-panel" id="panel-bbs">
+                            <p class="welcome-desc"
+                                data-vi="Dán <b>link cart trên BBS</b> của Lexaloffle (hoặc chỉ mã PID) để chơi ngay, không cần tải tệp về. Ví dụ: <i>lexaloffle.com/bbs/?pid=11722</i>"
+                                data-en="Paste a <b>Lexaloffle BBS cart link</b> (or just the PID) to play instantly, no download needed. Example: <i>lexaloffle.com/bbs/?pid=11722</i>">
+                                Dán link cart trên BBS của Lexaloffle.</p>
+
+                            <div class="bbs-row">
+                                <input class="bbs-input" id="bbs-input" type="text" spellcheck="false"
+                                    data-vi="Dán link cart hoặc mã PID..." data-en="Paste cart link or PID..."
+                                    placeholder="Dán link cart hoặc mã PID...">
+                                <button class="action-btn-big" id="btn-open-bbs" data-vi="CHƠI" data-en="PLAY">CHƠI</button>
+                            </div>
+
+                            <div class="terminal-disclaimer">
+                                <span class="disclaimer-prefix" data-vi="&gt;_ LƯU Ý:"
+                                    data-en="&gt;_ DISCLAIMER:">&gt;_ LƯU Ý:</span><span
+                                    data-vi="Cart được phát bằng trình nhúng chính thức của Lexaloffle (<i>widget.php</i>), toàn bộ dữ liệu do máy chủ của họ cung cấp. Nếu cart bị gỡ hoặc mã PID sai thì khung sẽ báo lỗi."
+                                    data-en="Carts are played through Lexaloffle's official embed widget (<i>widget.php</i>); all data comes from their server. If a cart was removed or the PID is wrong, the frame will show an error.">Cart
+                                    được phát bằng trình nhúng chính thức của Lexaloffle.</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- SÂN KHẤU PICO-8 -->
                 <div class="pico-stage" id="pico-stage">
+                    <!-- Nhắc kéo thả khi đang nhúng site ngoài -->
+                    <div class="external-hint" id="external-hint">
+                        <span id="external-hint-text"></span>
+                        <button type="button" id="btn-close-hint" title="Ẩn">✕</button>
+                    </div>
+
                     <div class="pico-frame-wrap">
                         <iframe id="pico-frame" title="PICO-8 cart" allow="autoplay; fullscreen; gamepad"></iframe>
                     </div>
@@ -335,6 +536,11 @@
                     data-vi="💡 Nếu bàn phím không ăn, hãy bấm một lần vào khung game để lấy tiêu điểm (focus). Bật <b>NÚT ẢO</b> ở thanh trên nếu bạn dùng màn hình cảm ứng hoặc muốn bấm bằng chuột."
                     data-en="💡 If the keyboard does not respond, click once inside the game frame to give it focus. Toggle <b>TOUCH PAD</b> in the top bar for touch screens or mouse play."></div>
 
+                <div class="sidebar-note"
+                    data-vi="🎓 Ba cách nạp cart: <b>Bản xuất HTML</b> (chạy offline ngay trên máy bạn), <b>Education</b> (nhúng pico-8-edu.com, kéo thả thẳng tệp .p8), và <b>Cart BBS</b> (dán link cart công khai). Hai chế độ sau tải từ máy chủ Lexaloffle nên cần mạng và dùng bàn phím/nút cảm ứng của chính họ."
+                    data-en="🎓 Three ways to load a cart: <b>HTML export</b> (fully offline on your device), <b>Education</b> (embeds pico-8-edu.com, drop a .p8 straight in), and <b>BBS cart</b> (paste a public cart link). The last two load from Lexaloffle's servers, so they need a connection and use their own keyboard / touch controls.">
+                </div>
+
                 <div class="sidebar-ad-zone">
                     <div class="sidebar-ad-label" data-vi="QUẢNG CÁO" data-en="ADVERTISEMENT">QUẢNG CÁO</div>
                     <div class="sidebar-ad-placeholder">[ GOOGLE ADSENSE SIDEBAR AD ]</div>
@@ -368,7 +574,12 @@
                 $('#btn-lang-en').classList.toggle('active', l === 'en');
                 document.querySelectorAll('[data-vi]').forEach(function (el) {
                     var text = l === 'vi' ? el.getAttribute('data-vi') : el.getAttribute('data-en');
-                    if (text !== null) el.innerHTML = text;
+                    if (text === null) return;
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = text;
+                    } else {
+                        el.innerHTML = text;
+                    }
                 });
                 document.title = l === 'vi'
                     ? 'Chơi PICO-8 Online - Trình Chạy Cartridge Fantasy Console'
@@ -457,6 +668,7 @@
                 frame.src = url;
 
                 document.body.classList.add('playing');
+                document.body.classList.remove('external-mode');
                 frame.addEventListener('load', function () {
                     try { frame.contentWindow.focus(); } catch (e) { /* bỏ qua */ }
                 }, { once: true });
@@ -487,9 +699,11 @@
                     return ['html', 'htm', 'zip'].indexOf(ext(f.name)) !== -1;
                 });
 
+                // Cart thô: chuyển sang tab Education vì chỉ chế độ đó nạp được .p8
                 if (rawCart.length && !hasPlayable) {
-                    showToast(t('❌ Cart .p8/.p8.png cần được xuất ra HTML từ PICO-8 trước khi chơi tại đây.',
-                        '❌ .p8/.p8.png carts must be exported to HTML from PICO-8 first.'), 'danger');
+                    switchMode('edu');
+                    showToast(t('🎓 Cart .p8 chỉ chơi được ở chế độ Education — bấm "MỞ EDUCATION EDITION" rồi kéo thả tệp vào khung.',
+                        '🎓 .p8 carts only run in Education mode — press "OPEN EDUCATION EDITION", then drag the file into the frame.'), 'warning');
                     return;
                 }
 
@@ -511,6 +725,50 @@
                             '❌ Could not read the cart. Please try again!'), 'danger');
                     }
                 });
+            }
+
+            /* ---------------- Nhúng site ngoài: Education & BBS ---------------- */
+
+            var EDU_URL = 'https://www.pico-8-edu.com/';
+            var BBS_WIDGET = 'https://www.lexaloffle.com/bbs/widget.php?pid=';
+
+            // Mở một trang PICO-8 của Lexaloffle trong khung nhúng.
+            // Đây là trang khác miền nên trang này KHÔNG đọc/điều khiển được bên trong.
+            function openExternal(url, hintVi, hintEn) {
+                var frame = $('#pico-frame');
+                frame.src = url;
+
+                document.body.classList.add('playing', 'external-mode');
+                document.body.classList.remove('show-pad');
+
+                var hint = $('#external-hint');
+                hint.style.display = '';
+                $('#external-hint-text').innerHTML = t(hintVi, hintEn);
+
+                var label = $('#btn-load-label');
+                label.setAttribute('data-vi', 'ĐỔI CART');
+                label.setAttribute('data-en', 'CHANGE CART');
+                label.innerHTML = t('ĐỔI CART', 'CHANGE CART');
+            }
+
+            // Nhận cả link đầy đủ lẫn mã PID trần
+            function parsePid(input) {
+                var s = String(input || '').trim();
+                if (!s) return null;
+                var m = s.match(/[?&]pid=([A-Za-z0-9_-]+)/i);
+                if (m) return m[1];
+                if (/^[A-Za-z0-9_-]+$/.test(s)) return s;
+                return null;
+            }
+
+            function switchMode(mode) {
+                document.querySelectorAll('.mode-tab').forEach(function (b) {
+                    b.classList.toggle('active', b.getAttribute('data-mode') === mode);
+                });
+                document.querySelectorAll('.mode-panel').forEach(function (p) {
+                    p.classList.toggle('active', p.id === 'panel-' + mode);
+                });
+                localStorage.setItem('pico8_mode', mode);
             }
 
             /* ---------------- Nút ảo ---------------- */
@@ -600,6 +858,42 @@
 
                 $('#btn-toggle-pad').addEventListener('click', function () {
                     document.body.classList.toggle('show-pad');
+                });
+
+                // Chuyển tab chế độ nạp cart
+                document.querySelectorAll('.mode-tab').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        switchMode(btn.getAttribute('data-mode'));
+                    });
+                });
+                switchMode(localStorage.getItem('pico8_mode') || 'local');
+
+                // Mở PICO-8 Education Edition
+                $('#btn-open-edu').addEventListener('click', function () {
+                    openExternal(EDU_URL,
+                        '🎓 Bấm ▶ để khởi động → kéo thả tệp <b>.p8 / .p8.png</b> vào màn hình → gõ <b>RUN</b> rồi Enter',
+                        '🎓 Press ▶ to boot → drag &amp; drop your <b>.p8 / .p8.png</b> onto the screen → type <b>RUN</b> and hit Enter');
+                });
+
+                // Mở cart công khai trên BBS
+                function openBbs() {
+                    var pid = parsePid($('#bbs-input').value);
+                    if (!pid) {
+                        showToast(t('❌ Link hoặc mã PID không hợp lệ. Ví dụ: lexaloffle.com/bbs/?pid=11722',
+                            '❌ Invalid link or PID. Example: lexaloffle.com/bbs/?pid=11722'), 'danger');
+                        return;
+                    }
+                    openExternal(BBS_WIDGET + encodeURIComponent(pid),
+                        '🌐 Đang phát cart BBS <b>' + pid + '</b> qua trình nhúng của Lexaloffle',
+                        '🌐 Playing BBS cart <b>' + pid + '</b> via Lexaloffle\'s embed widget');
+                }
+                $('#btn-open-bbs').addEventListener('click', openBbs);
+                $('#bbs-input').addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') openBbs();
+                });
+
+                $('#btn-close-hint').addEventListener('click', function () {
+                    $('#external-hint').style.display = 'none';
                 });
 
                 var input = $('#rom-file');
